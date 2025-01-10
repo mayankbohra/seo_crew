@@ -1,0 +1,13 @@
+# Core dependencies
+anthropic>=0.8.1
+python-dotenv>=1.0.0
+crewai>=0.11.0
+langchain>=0.1.0
+
+# File handling and data processing
+pathlib>=1.0
+tqdm>=4.65.0
+
+# Server dependencies
+flask>=2.0.0
+flask-cors>=4.0.0

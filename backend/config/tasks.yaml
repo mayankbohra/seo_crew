@@ -1,0 +1,70 @@
+analyze_keyword_rankings_data:
+  description: >
+    As a Senior SEO Data Analyst, analyze the keyword performance data from both competitor and user rankings:
+
+    1. First analyze competitor rankings data:
+       - Use the FileReadTool to read competitor_rankings.json
+       - For each competitor domain, examine:
+         - Keyword rankings and positions
+         - Search volumes
+         - Keyword difficulty scores
+         - Top ranking URLs
+       - Create detailed tables showing competitor keyword metrics
+       - Identify patterns and insights across competitor domains
+
+    2. Then analyze user rankings data:
+       - Use the FileReadTool to read user_rankings.json
+       - Create tables showing:
+         - Keyword rankings and positions
+         - Search volumes
+         - Keyword difficulty scores
+         - Top ranking URLs
+       - Compare performance against competitor benchmarks
+       - Identify gaps and opportunities
+
+    3. Provide strategic recommendations:
+       - Compare user vs competitor keyword targeting
+       - Highlight areas where user rankings lag behind competitors
+       - Suggest specific keywords to focus on improving
+       - Recommend content and optimization strategies
+       - Set realistic ranking improvement targets
+
+    Present all findings based strictly on the real data from both ranking files, without assumptions
+    or external information.
+
+  expected_output: >
+    A detailed markdown report containing:
+    1. Data tables showing competitor keyword metrics and patterns
+    2. Data tables showing user keyword performance
+    3. Comparative analysis between user and competitor rankings
+    4. Strategic recommendations backed by specific data points
+    5. All analysis based strictly on data from competitor_rankings.json and user_rankings.json
+
+
+generate_blog_post_outlines:
+  description: >
+    1. First, use the FileReadTool with UTF-8 encoding to read rankings.json and analyze its content
+    to find keywords where:
+       - Search volume is high
+       - Keyword difficulty is low
+    2. Then, for each selected keyword:
+       - Get its exact topRankedUrl from the rankings data
+       - create a detailed blog outline for 'Jaipuria Institute of Management', that will outrank it
+       - ensure content is factual, balanced and avoids controversial topics
+       - focus only on Jaipuria Institute of Management's offerings and expertise
+    Use ONLY the data from the rankings.json file. Do not make up or hallucinate any information.
+  expected_output: >
+    A markdown document with ALL the 5 (1-5) blog post outlines tailored ONLY for 'Jaipuria Institute of Management'.
+    Don't promote, compare with, or mention any other institution's name.
+    Each outline must include:
+    1. Exact keyword data from rankings.json:
+       - Keyword (exact text)
+       - Search Volume (exact number)
+       - Keyword Difficulty (exact score)
+       - Current ranking URL (exact topRankedUrl)
+    2. Content outline that specifically targets this keyword and URL:
+       - Blog title incorporating the exact keyword
+       - Meta description and title tags
+       - Detailed sections with proper formatting and sub-headings designed to outperform the ranking URL
+       - Word count and formatting recommendations
+       - Content must be factual, non-controversial and focused on Jaipuria's expertise
