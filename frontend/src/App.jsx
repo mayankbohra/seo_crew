@@ -8,6 +8,7 @@ import ProgressStatus from './components/progress/ProgressStatus';
 import DownloadPage from './components/download/DownloadPage';
 import BlogGenerationForm from './components/forms/BlogGenerationForm';
 import { startCrewExecution } from './services/api';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Buffer polyfill for base64 conversion
 const bufferFromBase64 = base64String => {
@@ -97,9 +98,11 @@ function App() {
 // Wrap only the outer component with Router
 function AppWrapper() {
     return (
-        <Router>
-            <App />
-        </Router>
+        <ErrorBoundary>
+            <Router>
+                <App />
+            </Router>
+        </ErrorBoundary>
     );
 }
 

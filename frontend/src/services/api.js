@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000'
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const startCrewExecution = async (data) => {
     try {
@@ -8,23 +8,23 @@ export const startCrewExecution = async (data) => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data)
-        })
+        });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const result = await response.json()
+        const result = await response.json();
         if (result.status === 'error') {
-            throw new Error(result.message)
+            throw new Error(result.message);
         }
 
-        return result
+        return result;
     } catch (error) {
-        console.error('API Error:', error)
-        throw new Error('Failed to process request. Please try again.')
+        console.error('API Error:', error);
+        throw new Error('Failed to process request. Please try again.');
     }
-}
+};
 
 export const convertToWord = async (markdownContent) => {
     try {

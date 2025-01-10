@@ -11,3 +11,7 @@ tqdm>=4.65.0
 # Server dependencies
 flask>=2.0.0
 flask-cors>=4.0.0
+waitress>=2.1.2
+
+# Document handling
+python-docx>=0.8.11
