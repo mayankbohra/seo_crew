@@ -10,25 +10,6 @@ import BlogGenerationForm from './components/forms/BlogGenerationForm';
 import { startCrewExecution } from './services/api';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Buffer polyfill for base64 conversion
-const bufferFromBase64 = base64String => {
-    try {
-        // Add padding if needed
-        const paddedString = base64String.padEnd(base64String.length + (4 - base64String.length % 4) % 4, '=');
-
-        // Decode base64
-        const binary = window.atob(paddedString);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-            bytes[i] = binary.charCodeAt(i);
-        }
-        return bytes;
-    } catch (error) {
-        console.error('Base64 conversion error:', error);
-        throw new Error('Failed to convert document data');
-    }
-};
-
 function App() {
     const [showForm, setShowForm] = useState(false);
     const [processing, setProcessing] = useState(false);

@@ -1,17 +1,11 @@
 # Core dependencies
-anthropic>=0.8.1
-python-dotenv>=1.0.0
-crewai>=0.11.0
-langchain>=0.1.0
-
-# File handling and data processing
-pathlib>=1.0
-tqdm>=4.65.0
-
-# Server dependencies
-flask>=2.0.0
-flask-cors>=4.0.0
-waitress>=2.1.2
-
-# Document handling
-python-docx>=0.8.11
+anthropic==0.42.0
+python-dotenv==1.0.1
+crewai==0.86.0
+langchain==0.3.13
+tqdm==4.65.0
+flask==3.1.0
+flask-cors==5.0.0
+waitress==3.0.2
+python-docx==1.1.2
+Spire.Doc==12.12.0
