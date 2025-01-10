@@ -26,17 +26,6 @@ export const startCrewExecution = async (data) => {
     }
 };
 
-export const convertToWord = async (markdownContent) => {
-    try {
-        const { md2docx } = await import('@adobe/helix-md2docx')
-        const docxBuffer = await md2docx(markdownContent)
-        return docxBuffer
-    } catch (error) {
-        console.error('Error converting to Word:', error)
-        throw error
-    }
-}
-
 export const generateBlog = async (blogOutline) => {
     try {
         const response = await fetch(`${API_URL}/generate-blog`, {
