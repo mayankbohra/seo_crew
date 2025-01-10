@@ -2,6 +2,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 export default function DownloadPage() {
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const navigate = useNavigate();
     const location = useLocation();
     const downloadFiles = location.state?.downloadFiles || {
@@ -66,7 +68,7 @@ export default function DownloadPage() {
                                 Comprehensive analysis of your competitors and SEO strategy recommendations.
                             </p>
                             <a
-                                href={`http://localhost:5000/download/${downloadFiles.analysis}`}
+                                href={`${API_URL}/download/${downloadFiles.analysis}`}
                                 className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg
                                          hover:bg-green-700 transition-colors space-x-2"
                             >
@@ -88,7 +90,7 @@ export default function DownloadPage() {
                                 Structured outlines for your upcoming blog posts with SEO optimization guidelines.
                             </p>
                             <a
-                                href={`http://localhost:5000/download/${downloadFiles.outlines}`}
+                                href={`${API_URL}/download/${downloadFiles.outlines}`}
                                 className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg
                                          hover:bg-blue-700 transition-colors space-x-2"
                             >

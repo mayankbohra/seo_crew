@@ -5,6 +5,8 @@ import { generateBlog } from '../../services/api';
 import ProgressBar from '../progress/ProgressBar';
 
 export default function BlogGenerationForm() {
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const [blogOutline, setBlogOutline] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -33,7 +35,7 @@ export default function BlogGenerationForm() {
         try {
             const result = await generateBlog(blogOutline);
             if (result.status === 'success' && result.docxFile) {
-                setDownloadUrl(`http://localhost:5000/download/${result.docxFile}`);
+                setDownloadUrl(`${API_URL}/download/${result.docxFile}`);
             }
             clearInterval(progressInterval);
             setProgress(100);
