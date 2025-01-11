@@ -6,12 +6,17 @@ from pathlib import Path
 import atexit
 from spire.doc import Document, FileFormat
 from blog_writer import generate_blog
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS").split(",")
 
 app = Flask(__name__)
 # Configure CORS properly
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:5173"],
+        "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
