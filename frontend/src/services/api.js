@@ -6,7 +6,9 @@ export const startCrewExecution = async (data) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify(data)
         });
 
@@ -29,12 +31,13 @@ export const startCrewExecution = async (data) => {
 
 export const generateBlog = async (blogOutline) => {
     try {
-        // First generate the blog
         const response = await fetch(`${API_URL}/generate-blog`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({ blogOutline })
         });
 
