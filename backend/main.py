@@ -26,43 +26,59 @@ def run_crew(institution_name, domain_url):
         spy_tool = SpyfuTool()
 
         # Fetch user rankings
-        print("\nFetching user rankings...")
-        user_rankings = spy_tool._get_just_made_it_keywords(domain_url)
-        user_rankings_json = json.loads(user_rankings)
+        # print("\nFetching user rankings...")
+        # user_rankings = spy_tool._get_just_made_it_keywords(domain_url)
+        # user_rankings_json = json.loads(user_rankings)
 
-        with open(output_dir / 'data' / 'user_rankings.json', 'w', encoding='utf-8') as f:
-            json.dump(user_rankings_json, f, indent=2, ensure_ascii=False)
+        # with open(output_dir / 'data' / 'user_rankings.json', 'w', encoding='utf-8') as f:
+        #     json.dump(user_rankings_json, f, indent=2, ensure_ascii=False)
 
         # Fetch competitor data
-        print("\nFetching competitor rankings...")
-        competitors = spy_tool._get_top_competitors(domain=domain_url)
-        competitors_json = json.loads(competitors)
+        # print("\nFetching competitor rankings...")
+        # competitors = spy_tool._get_top_competitors(domain=domain_url)
+        # competitors_json = json.loads(competitors)
 
-        with open(output_dir / 'data' / 'competitors.json', 'w', encoding='utf-8') as f:
-            json.dump(competitors_json, f, indent=2, ensure_ascii=False)
+        # with open(output_dir / 'data' / 'competitors.json', 'w', encoding='utf-8') as f:
+        #     json.dump(competitors_json, f, indent=2, ensure_ascii=False)
 
         # Get rankings for each competitor
-        rankings_data = {}
-        for competitor in competitors_json['results']:
-            domain = competitor['domain']
-            print(f"\nFetching rankings for: {domain}")
+        # rankings_data = {}
+        # for competitor in competitors_json['results']:
+        #     domain = competitor['domain']
+        #     print(f"\nFetching rankings for: {domain}")
 
-            rankings = spy_tool._get_just_made_it_keywords(domain)
-            rankings_json = json.loads(rankings)
-            rankings_data[domain] = rankings_json
+        #     rankings = spy_tool._get_just_made_it_keywords(domain)
+        #     rankings_json = json.loads(rankings)
+        #     rankings_data[domain] = rankings_json
 
-        with open(output_dir / 'data' / 'competitor_rankings.json', 'w', encoding='utf-8') as f:
-            json.dump(rankings_data, f, indent=2, ensure_ascii=False)
+        # with open(output_dir / 'data' / 'competitor_rankings.json', 'w', encoding='utf-8') as f:
+        #     json.dump(rankings_data, f, indent=2, ensure_ascii=False)
 
         # Initialize and run the crew
         crew = SeoCrew()
         crew.setup(inputs)
-        result = crew.crew().kickoff()
+        crew.crew().kickoff()
+
+        # Read the generated markdown files
+        crew_dir = Path('outputs/crew')
+        markdown_content = {}
+
+        # Read analysis markdown
+        analysis_path = crew_dir / '1_analysis.md'
+        if analysis_path.exists():
+            with open(analysis_path, 'r', encoding='utf-8') as f:
+                markdown_content['analysis'] = f.read()
+
+        # Read outlines markdown
+        outlines_path = crew_dir / '2_blog_post_outlines.md'
+        if outlines_path.exists():
+            with open(outlines_path, 'r', encoding='utf-8') as f:
+                markdown_content['outlines'] = f.read()
 
         return {
             'status': 'success',
             'message': 'Crew execution completed successfully',
-            'result': result
+            'markdown': markdown_content
         }
 
     except Exception as e:

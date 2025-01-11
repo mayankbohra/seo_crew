@@ -11,10 +11,11 @@ export const startCrewExecution = async (data) => {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error('HTTP error! status: ' + response.status);
         }
 
         const result = await response.json();
+
         if (result.status === 'error') {
             throw new Error(result.message);
         }
@@ -22,7 +23,7 @@ export const startCrewExecution = async (data) => {
         return result;
     } catch (error) {
         console.error('API Error:', error);
-        throw new Error('Failed to process request. Please try again.');
+        throw error;
     }
 };
 

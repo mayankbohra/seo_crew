@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Hero from './components/home/Hero';
 import Features from './components/home/Features';
@@ -9,30 +9,58 @@ import DownloadPage from './components/download/DownloadPage';
 import BlogGenerationForm from './components/forms/BlogGenerationForm';
 import { startCrewExecution } from './services/api';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useNavigate } from 'react-router-dom';
+import { stepTimings, totalDuration } from './config/progress';
 
-function App() {
+// Separate component for home page content
+function HomeContent({ showForm, processing, currentStep, onGetStarted, onSubmit, onBack }) {
+    if (!showForm && !processing) {
+        return (
+            <>
+                <Hero onGetStarted={onGetStarted} />
+                <Features />
+                <ProcessFlow />
+            </>
+        );
+    }
+    if (showForm && !processing) {
+        return <InstituteForm onSubmit={onSubmit} onBack={onBack} />;
+    }
+    return <ProgressStatus currentStep={currentStep} />;
+}
+
+// Main content wrapper with navigation
+function MainContent() {
     const [showForm, setShowForm] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [currentStep, setCurrentStep] = useState(-1);
-    const [downloadFiles, setDownloadFiles] = useState({
-        analysis: null,
-        outlines: null
-    });
     const navigate = useNavigate();
 
-    // Progress simulation
+    // Progress simulation using stepTimings
     useEffect(() => {
         let timeoutIds = [];
 
-        if (processing && currentStep < 3) {
-            // Schedule step increments
-            timeoutIds.push(setTimeout(() => setCurrentStep(1), 10000));  // Finding competitors
-            timeoutIds.push(setTimeout(() => setCurrentStep(2), 20000)); // Analyzing keywords
-            timeoutIds.push(setTimeout(() => setCurrentStep(3), 25000)); // Generating outlines
+        if (processing) {
+            // Schedule each step based on accumulated timings
+            stepTimings.forEach(({ step, time }) => {
+                timeoutIds.push(setTimeout(() => {
+                    setCurrentStep(step);
+                    console.log(`Starting step ${step} at ${time}ms`); // For debugging
+                }, time));
+            });
+
+            // Schedule completion
+            timeoutIds.push(setTimeout(() => {
+                setProcessing(false);
+                if (location.state?.downloadFiles && location.state?.markdownContent) {
+                    navigate('/download', {
+                        state: location.state
+                    });
+                }
+            }, totalDuration + 1000)); // Add 1 second buffer for smooth transition
         }
 
-        // Cleanup timeouts if component unmounts or processing stops
-        return () => timeoutIds.forEach(id => clearTimeout(id));
+        return () => timeoutIds.forEach(clearTimeout);
     }, [processing]);
 
     const handleSubmit = async (formData) => {
@@ -41,50 +69,53 @@ function App() {
 
         try {
             const result = await startCrewExecution(formData);
-            if (!result.docxFiles) {
-                throw new Error('No document files received from server');
+            if (result.status === 'error') {
+                throw new Error(result.message);
             }
-            setDownloadFiles(result.docxFiles);
-            setProcessing(false);
-            navigate('/download', { state: { downloadFiles: result.docxFiles } });
+
+            // Store the result but don't navigate yet - let the progress complete
+            location.state = {
+                downloadFiles: result.docxFiles,
+                markdownContent: result.markdown
+            };
+
         } catch (error) {
             console.error('Error:', error);
             setProcessing(false);
+            setCurrentStep(-1);
+            alert('An error occurred: ' + error.message);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Routes>
-                <Route path="/" element={
-                    !showForm && !processing ? (
-                        <>
-                            <Hero onGetStarted={() => setShowForm(true)} />
-                            <Features />
-                            <ProcessFlow />
-                        </>
-                    ) : showForm && !processing ? (
-                        <InstituteForm onSubmit={handleSubmit} onBack={() => setShowForm(false)} />
-                    ) : (
-                        <ProgressStatus currentStep={currentStep} />
-                    )
-                } />
-                <Route path="/download" element={<DownloadPage />} />
-                <Route path="/generate-blog" element={<BlogGenerationForm />} />
-            </Routes>
-        </div>
+        <Routes>
+            <Route path="/" element={
+                <HomeContent
+                    showForm={showForm}
+                    processing={processing}
+                    currentStep={currentStep}
+                    onGetStarted={() => setShowForm(true)}
+                    onSubmit={handleSubmit}
+                    onBack={() => setShowForm(false)}
+                />
+            } />
+            <Route path="/download" element={<DownloadPage />} />
+            <Route path="/generate-blog" element={<BlogGenerationForm />} />
+        </Routes>
     );
 }
 
-// Wrap only the outer component with Router
-function AppWrapper() {
+// App component with router
+function App() {
     return (
         <ErrorBoundary>
             <Router>
-                <App />
+                <div className="min-h-screen bg-gray-50">
+                    <MainContent />
+                </div>
             </Router>
         </ErrorBoundary>
     );
 }
 
-export default AppWrapper;
+export default App;

@@ -69,7 +69,7 @@ class SpyfuTool(BaseTool):
                 f"/apis/competitors_api/v2/seo/getTopCompetitors?"
                 f"domain={clean_domain}&"
                 f"startingRow=2&"
-                f"pageSize=6&"
+                f"pageSize=5&"
                 f"countryCode=IN"
             )
 

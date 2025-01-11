@@ -1,32 +1,5 @@
 import { motion } from 'framer-motion'
-
-const steps = [
-    {
-        title: "Extracting user data...",
-        description: "Gathering information about your institution",
-        icon: "📊"
-    },
-    {
-        title: "Finding competitors...",
-        description: "Identifying top competitors in your space",
-        icon: "🔍"
-    },
-    {
-        title: "Analyzing competitor keywords...",
-        description: "Discovering high-value keyword opportunities",
-        icon: "📈"
-    },
-    {
-        title: "Generating blog outlines...",
-        description: "Creating strategic content plans",
-        icon: "✍️"
-    },
-    {
-        title: "Converting documents to Word format...",
-        description: "Preparing downloadable files",
-        icon: "📄"
-    }
-]
+import { progressSteps } from '../../config/progress'
 
 export default function ProgressStatus({ currentStep }) {
     return (
@@ -48,15 +21,16 @@ export default function ProgressStatus({ currentStep }) {
 
                 {/* Progress Steps */}
                 <div className="bg-white rounded-2xl shadow-xl p-8">
-                    {steps.map((step, index) => (
+                    {progressSteps.map((step, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
+                            animate={{
+                                opacity: index <= currentStep ? 1 : 0.5,
+                                x: 0
+                            }}
                             transition={{ delay: index * 0.2 }}
-                            className={`flex items-start mb-8 last:mb-0 ${
-                                index <= currentStep ? 'opacity-100' : 'opacity-50'
-                            }`}
+                            className={`flex items-start mb-8 last:mb-0`}
                         >
                             {/* Step Icon */}
                             <div className="relative">
@@ -67,11 +41,11 @@ export default function ProgressStatus({ currentStep }) {
                                         backgroundColor: index <= currentStep ? '#4F46E5' : '#E5E7EB'
                                     }}
                                     className="w-12 h-12 rounded-full flex items-center justify-center
-                                             text-xl shadow-md"
+                                             text-xl shadow-md text-white"
                                 >
                                     <span>{step.icon}</span>
                                 </motion.div>
-                                {index < steps.length - 1 && (
+                                {index < progressSteps.length - 1 && (
                                     <div className={`absolute top-12 left-1/2 w-0.5 h-8 transform -translate-x-1/2
                                                     ${index < currentStep ? 'bg-indigo-500' : 'bg-gray-200'}`} />
                                 )}
@@ -92,26 +66,23 @@ export default function ProgressStatus({ currentStep }) {
 
                                 {/* Progress Animation for Current Step */}
                                 {index === currentStep && (
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: "100%" }}
-                                        transition={{ duration: 2, repeat: Infinity }}
-                                        className="h-1 bg-indigo-500 mt-2 rounded-full"
-                                    />
+                                    <div className="relative mt-2">
+                                        <div className="h-1 bg-gray-200 rounded-full w-full" />
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: "100%" }}
+                                            transition={{
+                                                duration: step.duration / 1000,
+                                                ease: "linear"
+                                            }}
+                                            className="h-1 bg-indigo-500 rounded-full absolute top-0 left-0"
+                                        />
+                                    </div>
                                 )}
                             </div>
                         </motion.div>
                     ))}
                 </div>
-
-                {/* Loading Message */}
-                <motion.div
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="text-center mt-8 text-indigo-600 font-medium"
-                >
-                    Processing step {currentStep + 1} of {steps.length}...
-                </motion.div>
             </motion.div>
         </div>
     )

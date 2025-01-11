@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
 from main import run_crew
 import os
@@ -6,6 +6,7 @@ from pathlib import Path
 import atexit
 from spire.doc import Document, FileFormat
 from blog_writer import generate_blog
+from flask_cors import cross_origin
 
 app = Flask(__name__)
 CORS(app)
@@ -63,29 +64,31 @@ def run():
         print("Crew run complete")
 
         # Convert markdown files to docx
-        output_dir = Path('outputs/crew')
+        crew_dir = Path('outputs/crew')
         docx_files = {}
 
         # Convert analysis
         analysis_filename = 'analysis.docx'
-        analysis_md = output_dir / '1_analysis.md'
+        analysis_md = crew_dir / '1_analysis.md'
         if analysis_md.exists():
             if convert_markdown_to_docx(analysis_md, analysis_filename):
                 docx_files['analysis'] = analysis_filename
 
         # Convert outlines
         outlines_filename = 'blog_post_outlines.docx'
-        outlines_md = output_dir / '2_blog_post_outlines.md'
+        outlines_md = crew_dir / '2_blog_post_outlines.md'
         if outlines_md.exists():
             if convert_markdown_to_docx(outlines_md, outlines_filename):
                 docx_files['outlines'] = outlines_filename
 
         return jsonify({
             'status': 'success',
-            'docxFiles': docx_files
+            'markdown': result.get('markdown', {}),  # Pass markdown content
+            'docxFiles': docx_files  # Pass docx filenames
         })
 
     except Exception as e:
+        print(f"Error in /run: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': str(e)
@@ -127,6 +130,33 @@ def generate_blog_post():
         }), 500
 
     except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/markdown/<filename>')
+@cross_origin()
+def serve_markdown(filename):
+    """Serve markdown files"""
+    try:
+        file_path = Path('outputs/crew') / filename
+        if not file_path.exists():
+            return jsonify({
+                'status': 'error',
+                'message': 'File not found'
+            }), 404
+
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        response = make_response(content)
+        response.headers['Content-Type'] = 'text/markdown'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    except Exception as e:
+        print(f"Error serving markdown: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': str(e)

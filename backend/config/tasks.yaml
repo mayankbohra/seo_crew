@@ -8,7 +8,7 @@ analyze_keyword_rankings_data:
          - Keyword rankings and positions
          - Search volumes
          - Keyword difficulty scores
-         - Top ranking URLs
+         - Top ranking URLs (hyperlink each url on word 'Link')
        - Create detailed tables showing competitor keyword metrics
        - Identify patterns and insights across competitor domains
 
@@ -34,7 +34,7 @@ analyze_keyword_rankings_data:
 
   expected_output: >
     A detailed markdown report containing:
-    1. Data tables showing competitor keyword metrics and patterns
+    1. Data tables showing all the competitors keyword metrics and patterns
     2. Data tables showing user keyword performance
     3. Comparative analysis between user and competitor rankings
     4. Strategic recommendations backed by specific data points
