@@ -29,6 +29,7 @@ export const startCrewExecution = async (data) => {
 
 export const generateBlog = async (blogOutline) => {
     try {
+        // First generate the blog
         const response = await fetch(`${API_URL}/generate-blog`, {
             method: 'POST',
             headers: {
@@ -42,13 +43,32 @@ export const generateBlog = async (blogOutline) => {
         }
 
         const result = await response.json();
-        if (result.status === 'error') {
-            throw new Error(result.message);
-        }
 
-        return result;
+        if (result.status === 'success') {
+            // Then fetch the markdown content
+            const markdownResponse = await fetch(`${API_URL}/markdown/blog_post.md`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/markdown',
+                }
+            });
+
+            if (!markdownResponse.ok) {
+                throw new Error('Failed to fetch blog content');
+            }
+
+            const blogContent = await markdownResponse.text();
+
+            return {
+                status: 'success',
+                blogContent,
+                docxFile: result.docxFile
+            };
+        } else {
+            throw new Error(result.message || 'Failed to generate blog post');
+        }
     } catch (error) {
         console.error('API Error:', error);
-        throw new Error('Failed to generate blog post. Please try again.');
+        throw error;
     }
 };

@@ -6,14 +6,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def generate_blog(outline, output_filename=None):
+def generate_blog(blog_outline):
     """Generate a blog post from an outline"""
 
     api_key = os.getenv("ANTHROPIC_API_KEY")
     client = Anthropic(api_key=api_key)
-
-    output_dir = Path('outputs/blogs')
-    output_dir.mkdir(parents=True, exist_ok=True)
 
     # Hardcoded prompt template
     prompt_template = """
@@ -45,7 +42,7 @@ def generate_blog(outline, output_filename=None):
     """
 
     # Combine prompt template with outline
-    prompt = prompt_template.format(outline=outline)
+    prompt = prompt_template.format(outline=blog_outline)
 
     try:
         # Generate content using Claude
@@ -62,15 +59,25 @@ def generate_blog(outline, output_filename=None):
 
         blog_content = response.content[0].text
 
-        # Save to file
-        if output_filename:
-            output_path = output_dir / f"{output_filename}.md"
-            with open(output_path, 'w', encoding='utf-8') as f:
-                f.write(blog_content)
-            print(f"✓ Blog saved to: {output_path}")
-            return True
-        return blog_content
+        # Save the blog content
+        output_dir = Path('outputs/blogs')
+        output_dir.mkdir(exist_ok=True)
+
+        blog_path = output_dir / 'blog_post.md'
+        with open(blog_path, 'w', encoding='utf-8') as f:
+            f.write(blog_content)  # Your generated blog content
+
+        print(f"✓ Blog saved to: {blog_path}")
+
+        return {
+            'status': 'success',
+            'message': 'Blog post generated successfully',
+            'content': blog_content
+        }
 
     except Exception as e:
         print(f"Error generating blog: {str(e)}")
-        return False
+        return {
+            'status': 'error',
+            'message': str(e)
+        }

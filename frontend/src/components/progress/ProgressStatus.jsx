@@ -2,6 +2,8 @@ import { motion } from 'framer-motion'
 import { progressSteps } from '../../config/progress'
 
 export default function ProgressStatus({ currentStep }) {
+    const isComplete = currentStep === progressSteps.length - 1;
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-50 py-12 px-4">
             <motion.div
@@ -12,10 +14,13 @@ export default function ProgressStatus({ currentStep }) {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                        Generating Your Content
+                        {isComplete ? 'Finalizing Your Content...' : 'Generating Your Content'}
                     </h2>
                     <p className="text-lg text-gray-600">
-                        Please wait while we analyze and create optimized content for your institution
+                        {isComplete
+                            ? 'Please wait while we prepare your content for download'
+                            : 'Please wait while we analyze and create optimized content for your institution'
+                        }
                     </p>
                 </div>
 
@@ -29,7 +34,10 @@ export default function ProgressStatus({ currentStep }) {
                                 opacity: index <= currentStep ? 1 : 0.5,
                                 x: 0
                             }}
-                            transition={{ delay: index * 0.2 }}
+                            transition={{
+                                duration: 0.5,
+                                delay: index * 0.1
+                            }}
                             className={`flex items-start mb-8 last:mb-0`}
                         >
                             {/* Step Icon */}
@@ -82,6 +90,24 @@ export default function ProgressStatus({ currentStep }) {
                             </div>
                         </motion.div>
                     ))}
+
+                    {/* Waiting for Backend Message */}
+                    {isComplete && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="mt-8 text-center text-gray-600"
+                        >
+                            <div className="flex items-center justify-center space-x-2">
+                                <svg className="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Preparing your content...</span>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
             </motion.div>
         </div>

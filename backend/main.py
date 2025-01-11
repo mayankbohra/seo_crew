@@ -6,6 +6,50 @@ import json
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
+
+def fetch_data_from_spyfu(domain_url, output_dir):
+    spy_tool = SpyfuTool()
+
+    # Fetch user rankings
+    print("\nFetching user rankings...")
+    user_rankings = spy_tool._get_just_made_it_keywords(domain_url)
+    user_rankings_json = json.loads(user_rankings)
+
+    with open(output_dir / 'data' / 'user_rankings.json', 'w', encoding='utf-8') as f:
+        json.dump(user_rankings_json, f, indent=2, ensure_ascii=False)
+
+    # Fetch competitor data
+    print("\nFetching competitor rankings...")
+    competitors = spy_tool._get_top_competitors(domain=domain_url)
+    competitors_json = json.loads(competitors)
+
+    with open(output_dir / 'data' / 'competitors.json', 'w', encoding='utf-8') as f:
+        json.dump(competitors_json, f, indent=2, ensure_ascii=False)
+
+    # Get rankings for each competitor
+    rankings_data = {}
+    for competitor in competitors_json['results']:
+        domain = competitor['domain']
+        print(f"\nFetching rankings for: {domain}")
+
+        rankings = spy_tool._get_just_made_it_keywords(domain)
+        rankings_json = json.loads(rankings)
+        rankings_data[domain] = rankings_json
+
+    with open(output_dir / 'data' / 'competitor_rankings.json', 'w', encoding='utf-8') as f:
+        json.dump(rankings_data, f, indent=2, ensure_ascii=False)
+
+
+def remove_markdown_code_blocks(file_path):
+    if file_path.exists():
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        # Remove ```markdown and ``` tags
+        content = content.replace('```markdown', '').replace('```', '')
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+
 def run_crew(institution_name, domain_url):
     """
     Run the crew with given institution details.
@@ -23,46 +67,19 @@ def run_crew(institution_name, domain_url):
             'domain_url': domain_url,
         }
 
-        spy_tool = SpyfuTool()
-
-        # Fetch user rankings
-        # print("\nFetching user rankings...")
-        # user_rankings = spy_tool._get_just_made_it_keywords(domain_url)
-        # user_rankings_json = json.loads(user_rankings)
-
-        # with open(output_dir / 'data' / 'user_rankings.json', 'w', encoding='utf-8') as f:
-        #     json.dump(user_rankings_json, f, indent=2, ensure_ascii=False)
-
-        # Fetch competitor data
-        # print("\nFetching competitor rankings...")
-        # competitors = spy_tool._get_top_competitors(domain=domain_url)
-        # competitors_json = json.loads(competitors)
-
-        # with open(output_dir / 'data' / 'competitors.json', 'w', encoding='utf-8') as f:
-        #     json.dump(competitors_json, f, indent=2, ensure_ascii=False)
-
-        # Get rankings for each competitor
-        # rankings_data = {}
-        # for competitor in competitors_json['results']:
-        #     domain = competitor['domain']
-        #     print(f"\nFetching rankings for: {domain}")
-
-        #     rankings = spy_tool._get_just_made_it_keywords(domain)
-        #     rankings_json = json.loads(rankings)
-        #     rankings_data[domain] = rankings_json
-
-        # with open(output_dir / 'data' / 'competitor_rankings.json', 'w', encoding='utf-8') as f:
-        #     json.dump(rankings_data, f, indent=2, ensure_ascii=False)
+        fetch_data_from_spyfu(inputs['domain_url'], output_dir)
 
         # Initialize and run the crew
         crew = SeoCrew()
         crew.setup(inputs)
         crew.crew().kickoff()
 
-        # Read the generated markdown files
         crew_dir = Path('outputs/crew')
-        markdown_content = {}
+        # Clean up markdown files
+        remove_markdown_code_blocks(crew_dir / '1_analysis.md')
+        remove_markdown_code_blocks(crew_dir / '2_blog_post_outlines.md')
 
+        markdown_content = {}
         # Read analysis markdown
         analysis_path = crew_dir / '1_analysis.md'
         if analysis_path.exists():
@@ -73,7 +90,11 @@ def run_crew(institution_name, domain_url):
         outlines_path = crew_dir / '2_blog_post_outlines.md'
         if outlines_path.exists():
             with open(outlines_path, 'r', encoding='utf-8') as f:
-                markdown_content['outlines'] = f.read()
+                outlines_content = f.read()
+                # Ensure proper formatting
+                if not outlines_content.startswith('# Blog Post Outline'):
+                    outlines_content = outlines_content.replace('# Blog Outline', '# Blog Post Outline')
+                markdown_content['outlines'] = outlines_content
 
         return {
             'status': 'success',

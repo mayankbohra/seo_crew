@@ -1,17 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { generateBlog } from '../../services/api';
-import ProgressBar from '../progress/ProgressBar';
 
 export default function BlogGenerationForm() {
     const API_URL = import.meta.env.VITE_API_URL;
-
-    const [blogOutline, setBlogOutline] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [downloadUrl, setDownloadUrl] = useState(null);
-    const navigate = useNavigate();
+    const [blogContent, setBlogContent] = useState(null);
+    const [error, setError] = useState(null);
+    const [outlineData, setOutlineData] = useState(null);
+
+    useEffect(() => {
+        // Get outline data from localStorage
+        const storedOutline = localStorage.getItem('blogOutline');
+        if (storedOutline) {
+            setOutlineData(JSON.parse(storedOutline));
+            // Clean up localStorage
+            localStorage.removeItem('blogOutline');
+            // Start generation automatically
+            handleGenerate(JSON.parse(storedOutline));
+        }
+    }, []);
 
     const simulateProgress = () => {
         setProgress(0);
@@ -27,20 +39,24 @@ export default function BlogGenerationForm() {
         return interval;
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleGenerate = async (outline) => {
         setIsGenerating(true);
+        setError(null);
         const progressInterval = simulateProgress();
 
         try {
-            const result = await generateBlog(blogOutline);
-            if (result.status === 'success' && result.docxFile) {
-                setDownloadUrl(`${API_URL}/download/${result.docxFile}`);
+            const result = await generateBlog(outline.content);
+
+            if (result.status === 'success' && result.blogContent) {
+                setBlogContent(result.blogContent);
+                clearInterval(progressInterval);
+                setProgress(100);
+            } else {
+                throw new Error(result.message || 'Failed to generate blog content');
             }
-            clearInterval(progressInterval);
-            setProgress(100);
         } catch (error) {
             console.error('Error:', error);
+            setError(error.message || 'Failed to generate blog content');
             clearInterval(progressInterval);
             setProgress(0);
         } finally {
@@ -48,153 +64,80 @@ export default function BlogGenerationForm() {
         }
     };
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                duration: 0.6,
-                when: "beforeChildren",
-                staggerChildren: 0.2
-            }
+    const handleDownload = () => {
+        if (blogContent) {
+            // Use the docx file from the response
+            window.location.href = `${API_URL}/download/blog_post.docx`;
         }
     };
 
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.4 }
-        }
-    };
-
-    const buttonVariants = {
-        hover: { scale: 1.05, boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)" },
-        tap: { scale: 0.95 }
-    };
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 py-12 px-4">
+                <div className="max-w-4xl mx-auto text-center">
+                    <h2 className="text-2xl font-bold text-red-600 mb-4">Error Generating Blog</h2>
+                    <p className="text-gray-600 mb-8">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <motion.div
             className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
         >
             <div className="max-w-4xl mx-auto">
-                <motion.div
-                    className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100"
-                    variants={itemVariants}
-                >
-                    <motion.div
-                        className="text-center mb-8"
-                        variants={itemVariants}
-                    >
-                        <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                            Generate Blog Posts
-                        </h2>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Transform your blog outline into engaging, SEO-optimized content.
-                            Simply paste your outline below and let AI do the magic.
-                        </p>
-                    </motion.div>
+                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                    <h2 className="text-3xl font-bold text-center mb-8">
+                        {isGenerating ? 'Generating Blog Post...' : 'Blog Post Generated!'}
+                    </h2>
 
-                    <form onSubmit={handleSubmit} className="space-y-8">
-                        <motion.div
-                            variants={itemVariants}
-                            className="bg-gray-50 p-6 rounded-xl border border-gray-200"
-                        >
-                            <label
-                                htmlFor="blogOutline"
-                                className="block text-lg font-semibold text-gray-700 mb-3"
-                            >
-                                Your Blog Outline
-                            </label>
-                            <motion.textarea
-                                id="blogOutline"
-                                value={blogOutline}
-                                onChange={(e) => setBlogOutline(e.target.value)}
-                                rows={12}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm
-                                         focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-                                         transition-all duration-200 text-base"
-                                placeholder="Paste your blog outline here..."
-                                required
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.3, delay: 0.4 }}
-                            />
-                            <p className="mt-2 text-sm text-gray-500">
-                                Tip: Make sure to include all the sections and key points from your outline
+                    {isGenerating ? (
+                        <div className="space-y-6">
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <motion.div
+                                    className="bg-indigo-600 h-2 rounded-full"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${progress}%` }}
+                                    transition={{ duration: 0.5 }}
+                                />
+                            </div>
+                            <p className="text-center text-gray-600">
+                                Please wait while we generate your blog post...
                             </p>
-                        </motion.div>
+                        </div>
+                    ) : blogContent ? (
+                        <div className="space-y-8">
+                            <div className="prose max-w-none">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {blogContent}
+                                </ReactMarkdown>
+                            </div>
 
-                        <motion.div
-                            className="flex justify-center space-x-6"
-                            variants={itemVariants}
-                        >
-                            <motion.button
-                                type="button"
-                                onClick={() => navigate('/')}
-                                className="px-8 py-4 bg-gray-600 text-white rounded-xl
-                                         hover:bg-gray-700 transition-colors flex items-center space-x-2"
-                                variants={buttonVariants}
-                                whileHover="hover"
-                                whileTap="tap"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                                </svg>
-                                <span>Back to Home</span>
-                            </motion.button>
-                            <motion.button
-                                type="submit"
-                                className="px-8 py-4 bg-indigo-600 text-white rounded-xl
-                                         hover:bg-indigo-700 transition-colors flex items-center space-x-2"
-                                variants={buttonVariants}
-                                whileHover="hover"
-                                whileTap="tap"
-                            >
-                                <span>Generate Blog Posts</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                                </svg>
-                            </motion.button>
-                        </motion.div>
-                    </form>
-                </motion.div>
-
-                {isGenerating && (
-                    <motion.div
-                        className="mt-8"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                    >
-                        <ProgressBar progress={progress} />
-                        <p className="text-center text-gray-600 mt-4">
-                            Generating your blog post... ({progress}%)
-                        </p>
-                    </motion.div>
-                )}
-
-                {downloadUrl && !isGenerating && (
-                    <motion.div
-                        className="mt-8 text-center"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <a
-                            href={downloadUrl}
-                            className="px-8 py-4 bg-green-600 text-white rounded-xl
-                                     hover:bg-green-700 transition-colors inline-flex items-center space-x-2"
-                        >
-                            <span>Download Blog Post</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                        </a>
-                    </motion.div>
-                )}
+                            <div className="flex justify-center space-x-4">
+                                <button
+                                    onClick={handleDownload}
+                                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg
+                                             hover:bg-indigo-700 transition-colors flex items-center space-x-2"
+                                >
+                                    <span>Download Blog Post</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
             </div>
         </motion.div>
     );

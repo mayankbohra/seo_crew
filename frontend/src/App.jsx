@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Hero from './components/home/Hero';
 import Features from './components/home/Features';
@@ -10,7 +10,7 @@ import BlogGenerationForm from './components/forms/BlogGenerationForm';
 import { startCrewExecution } from './services/api';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
-import { stepTimings, totalDuration } from './config/progress';
+import { stepTimings, totalDuration, progressSteps } from './config/progress';
 
 // Separate component for home page content
 function HomeContent({ showForm, processing, currentStep, onGetStarted, onSubmit, onBack }) {
@@ -34,56 +34,69 @@ function MainContent() {
     const [showForm, setShowForm] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [currentStep, setCurrentStep] = useState(-1);
+    const [simulationComplete, setSimulationComplete] = useState(false);
+    const [backendData, setBackendData] = useState(null);
     const navigate = useNavigate();
+
+    // Effect to handle navigation when both simulation and backend are ready
+    useEffect(() => {
+        if (simulationComplete && backendData) {
+            setProcessing(false);
+            navigate('/download', {
+                state: backendData
+            });
+        }
+    }, [simulationComplete, backendData, navigate]);
 
     // Progress simulation using stepTimings
     useEffect(() => {
         let timeoutIds = [];
 
         if (processing) {
-            // Schedule each step based on accumulated timings
-            stepTimings.forEach(({ step, time }) => {
+            let accumulatedTime = 0;
+
+            // Schedule each step with its full duration
+            progressSteps.forEach((step, index) => {
                 timeoutIds.push(setTimeout(() => {
-                    setCurrentStep(step);
-                    console.log(`Starting step ${step} at ${time}ms`); // For debugging
-                }, time));
+                    setCurrentStep(index);
+                }, accumulatedTime));
+
+                accumulatedTime += step.duration;
             });
 
-            // Schedule completion
+            // Mark simulation as complete after all steps
             timeoutIds.push(setTimeout(() => {
-                setProcessing(false);
-                if (location.state?.downloadFiles && location.state?.markdownContent) {
-                    navigate('/download', {
-                        state: location.state
-                    });
-                }
-            }, totalDuration + 1000)); // Add 1 second buffer for smooth transition
+                setSimulationComplete(true);
+            }, accumulatedTime));
         }
 
         return () => timeoutIds.forEach(clearTimeout);
     }, [processing]);
 
     const handleSubmit = async (formData) => {
+        if (processing) return; // Prevent multiple submissions
+
         setProcessing(true);
-        setCurrentStep(0);
+        setSimulationComplete(false);
+        setBackendData(null);
 
         try {
             const result = await startCrewExecution(formData);
-            if (result.status === 'error') {
-                throw new Error(result.message);
+
+            if (result.status === 'success') {
+                setBackendData({
+                    downloadFiles: result.docxFiles,
+                    markdownContent: result.markdown
+                });
+            } else {
+                throw new Error(result.message || 'Failed to process request');
             }
-
-            // Store the result but don't navigate yet - let the progress complete
-            location.state = {
-                downloadFiles: result.docxFiles,
-                markdownContent: result.markdown
-            };
-
         } catch (error) {
             console.error('Error:', error);
             setProcessing(false);
             setCurrentStep(-1);
-            alert('An error occurred: ' + error.message);
+            setSimulationComplete(false);
+            // Handle error (show error message to user)
         }
     };
 

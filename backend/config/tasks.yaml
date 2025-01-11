@@ -34,7 +34,7 @@ analyze_keyword_rankings_data:
 
   expected_output: >
     A detailed markdown report containing:
-    1. Data tables showing all the competitors keyword metrics and patterns
+    1. Different data tables for all the competitors showing the keyword metrics and patterns
     2. Data tables showing user keyword performance
     3. Comparative analysis between user and competitor rankings
     4. Strategic recommendations backed by specific data points
@@ -56,15 +56,19 @@ generate_blog_post_outlines:
   expected_output: >
     A markdown document with ALL the 5 (1-5) blog post outlines tailored ONLY for 'Jaipuria Institute of Management'.
     Don't promote, compare with, or mention any other institution's name.
-    Each outline must include:
-    1. Exact keyword data from rankings.json:
-       - Keyword (exact text)
-       - Search Volume (exact number)
-       - Keyword Difficulty (exact score)
-       - Current ranking URL (exact topRankedUrl)
-    2. Content outline that specifically targets this keyword and URL:
-       - Blog title incorporating the exact keyword
-       - Meta description and title tags
-       - Detailed sections with proper formatting and sub-headings designed to outperform the ranking URL
-       - Word count and formatting recommendations
-       - Content must be factual, non-controversial and focused on Jaipuria's expertise
+    Each outline must start with:
+    # Blog Outline
+    ## Keyword data:
+    - Keyword: [exact text]
+    - Search Volume: [exact number]
+    - Keyword Difficulty: [exact score]
+    - Current ranking URL: [exact topRankedUrl]
+
+    ## Content outline:
+    - Blog title incorporating the exact keyword
+    - Meta description
+    - Sections with proper formatting and sub-headings designed to outperform the ranking URL
+    - Word count and formatting recommendations
+    - Content must be factual, non-controversial and focused on Jaipuria's expertise
+
+    Add "---" after each blog outline to separate them.

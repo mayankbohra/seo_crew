@@ -1,15 +1,21 @@
 from flask import Flask, request, jsonify, send_file, make_response
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from main import run_crew
 import os
 from pathlib import Path
 import atexit
 from spire.doc import Document, FileFormat
 from blog_writer import generate_blog
-from flask_cors import cross_origin
 
 app = Flask(__name__)
-CORS(app)
+# Configure CORS properly
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:5173"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 # Store active threads/processes
 active_processes = []
@@ -95,7 +101,7 @@ def run():
         }), 500
 
 @app.route('/generate-blog', methods=['POST'])
-def generate_blog_post():
+def generate_blog_endpoint():
     try:
         data = request.json
         blog_outline = data.get('blogOutline')
@@ -106,41 +112,42 @@ def generate_blog_post():
                 'message': 'Blog outline is required'
             }), 400
 
-        # Generate blog post
-        blog_content = generate_blog(blog_outline, "blog_post")
-        if not blog_content:
-            return jsonify({
-                'status': 'error',
-                'message': 'Failed to generate blog post'
-            }), 500
+        # Generate the blog
+        result = generate_blog(blog_outline)
 
-        # Convert markdown to docx
-        blog_md = Path('outputs/blogs/blog_post.md')
-        if blog_md.exists():
-            output_filename = 'blog_post.docx'
-            if convert_markdown_to_docx(blog_md, output_filename):
-                return jsonify({
-                    'status': 'success',
-                    'docxFile': output_filename
-                })
+        if result['status'] == 'success':
+            # Convert markdown to docx
+            blog_md = Path('outputs/blogs/blog_post.md')
+            if blog_md.exists():
+                output_filename = 'blog_post.docx'
+                if convert_markdown_to_docx(blog_md, output_filename):
+                    return jsonify({
+                        'status': 'success',
+                        'message': 'Blog post generated successfully',
+                        'docxFile': output_filename
+                    })
 
         return jsonify({
             'status': 'error',
-            'message': 'Failed to generate blog post'
+            'message': result.get('message', 'Failed to generate blog post')
         }), 500
 
     except Exception as e:
+        print(f"Error generating blog: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': str(e)
         }), 500
 
-@app.route('/markdown/<filename>')
-@cross_origin()
+@app.route('/markdown/<path:filename>')
 def serve_markdown(filename):
-    """Serve markdown files"""
     try:
-        file_path = Path('outputs/crew') / filename
+        # Determine the correct directory based on the file
+        if filename == 'blog_post.md':
+            file_path = Path('outputs/blogs') / filename
+        else:
+            file_path = Path('outputs/crew') / filename
+
         if not file_path.exists():
             return jsonify({
                 'status': 'error',
@@ -152,7 +159,6 @@ def serve_markdown(filename):
 
         response = make_response(content)
         response.headers['Content-Type'] = 'text/markdown'
-        response.headers['Access-Control-Allow-Origin'] = '*'
         return response
 
     except Exception as e:
