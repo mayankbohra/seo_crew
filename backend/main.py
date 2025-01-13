@@ -67,7 +67,7 @@ def run_crew(institution_name, domain_url):
             'domain_url': domain_url,
         }
 
-        # fetch_data_from_spyfu(inputs['domain_url'], output_dir)
+        fetch_data_from_spyfu(inputs['domain_url'], output_dir)
 
         # Initialize and run the crew
         crew = SeoCrew()
