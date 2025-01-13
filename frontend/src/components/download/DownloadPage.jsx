@@ -96,9 +96,17 @@ export default function DownloadPage() {
     };
 
     const handleBackToHome = () => {
-        // Remove any stored state and navigate to home
-        localStorage.removeItem('blogOutline'); // Clean up any stored data
-        navigate('/', { replace: true }); // Use replace to prevent back button issues
+        // Clear any stored data
+        localStorage.removeItem('blogOutline');
+
+        // Force a clean navigation to home
+        window.location.href = '/';
+
+        // Alternative approach using navigate if window.location doesn't work:
+        // navigate('/', {
+        //     replace: true,
+        //     state: {} // Clear any state
+        // });
     };
 
     if (!location.state?.markdownContent) {

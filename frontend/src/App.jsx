@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Hero from './components/home/Hero';
 import Features from './components/home/Features';
@@ -11,6 +11,8 @@ import { startCrewExecution } from './services/api';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { stepTimings, totalDuration, progressSteps } from './config/progress';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginPage from './components/auth/LoginPage';
 
 // Separate component for home page content
 function HomeContent({ showForm, processing, currentStep, onGetStarted, onSubmit, onBack }) {
@@ -118,15 +120,49 @@ function MainContent() {
     );
 }
 
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (!user) {
+        return <Navigate to="/login" />;
+    }
+
+    return children;
+};
+
 // App component with router
 function App() {
     return (
         <ErrorBoundary>
-            <Router>
-                <div className="min-h-screen bg-gray-50">
-                    <MainContent />
-                </div>
-            </Router>
+            <AuthProvider>
+                <Router>
+                    <div className="min-h-screen bg-gray-50">
+                        <Routes>
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="/" element={
+                                <ProtectedRoute>
+                                    <MainContent />
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/download" element={
+                                <ProtectedRoute>
+                                    <DownloadPage />
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/generate-blog" element={
+                                <ProtectedRoute>
+                                    <BlogGenerationForm />
+                                </ProtectedRoute>
+                            } />
+                        </Routes>
+                    </div>
+                </Router>
+            </AuthProvider>
         </ErrorBoundary>
     );
 }
