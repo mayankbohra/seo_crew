@@ -33,7 +33,7 @@ analyze_keyword_rankings_data:
     or external information.
 
   expected_output: >
-    A detailed markdown report containing:
+    Always provide a detailed markdown report containing:
     1. Different data tables for all the competitors showing the keyword metrics and patterns
     2. Data tables showing user keyword performance
     3. Comparative analysis between user and competitor rankings
@@ -72,3 +72,56 @@ generate_blog_post_outlines:
     - Content must be factual, non-controversial and focused on Jaipuria's expertise
 
     Add "---" after each blog outline to separate them.
+
+generate_ad_copies:
+  description: >
+    Create high-performing ad copies for both Google Ads and Meta Ads platforms:
+
+    1. First, analyze the keyword data from rankings.json to identify:
+       - High commercial intent keywords
+       - Keywords with good search volume
+       - Keywords relevant to student recruitment
+
+    2. For Google Ads, create 5 ad variations that:
+       - Follow the Responsive Search Ads format
+       - Include 3 headlines (30 chars max each)
+       - Have 2 descriptions (90 chars max each)
+       - Incorporate target keywords naturally
+       - Include clear calls-to-action
+       - Focus on unique value propositions
+       - Highlight key programs and accreditations
+
+    3. For Meta Ads, create 5 ad variations that:
+       - Follow Meta Ads format requirements
+       - Include primary text (125 chars max)
+       - Have compelling headlines (40 chars max)
+       - Include descriptions (30 chars max)
+       - Focus on visual-friendly messaging
+       - Create emotional connection
+       - Drive social engagement
+
+    4. For each ad copy:
+       - Include character count for each element
+       - Mark recommended combinations
+       - Add notes on targeting suggestions
+       - Provide A/B testing recommendations
+
+  expected_output: >
+    A markdown document with two main sections:
+
+    1. Google Ads Copies:
+       - 5 complete ad variations with all components
+       - Character counts for each element
+       - Recommended headline-description combinations
+       - Target keyword suggestions
+       - A/B testing notes
+
+    2. Meta Ads Copies:
+       - 5 complete ad variations with all components
+       - Character counts for each element
+       - Recommended visuals/creatives notes
+       - Audience targeting suggestions
+       - A/B testing recommendations
+
+    Format each ad copy in a clear, structured way with proper markdown formatting.
+    Include a summary of best practices and optimization tips for each platform.

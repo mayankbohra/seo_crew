@@ -109,6 +109,13 @@ def run():
             if convert_markdown_to_docx(outlines_md, outlines_filename):
                 docx_files['outlines'] = outlines_filename
 
+        # Convert ad
+        ad_filename = 'ad_copies.docx'
+        ad_md = crew_dir / '3_ad_copies.md'
+        if ad_md.exists():
+            if convert_markdown_to_docx(ad_md, ad_filename):
+                docx_files['ad'] = ad_filename
+
         return jsonify({
             'status': 'success',
             'markdown': result.get('markdown', {}),  # Pass markdown content

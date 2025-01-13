@@ -40,13 +40,14 @@ export default function DownloadPage() {
     const [activeOutlineTab, setActiveOutlineTab] = useState(1);
     const [markdownContent, setMarkdownContent] = useState({
         analysis: '',
-        outlines: []
+        outlines: [],
+        ad: ''
     });
 
     // Parse blog outlines into separate items
     useEffect(() => {
         if (location.state?.markdownContent) {
-            const { analysis, outlines } = location.state.markdownContent;
+            const { analysis, outlines, ad } = location.state.markdownContent;
 
             // Split outlines by "---" and filter out empty ones
             const blogOutlines = outlines
@@ -60,7 +61,8 @@ export default function DownloadPage() {
 
             setMarkdownContent({
                 analysis,
-                outlines: blogOutlines
+                outlines: blogOutlines,
+                ad
             });
 
             // Set the first outline as active if available
@@ -74,7 +76,8 @@ export default function DownloadPage() {
 
     const downloadFiles = location.state?.downloadFiles || {
         analysis: 'analysis.docx',
-        outlines: 'blog_post_outlines.docx'
+        outlines: 'blog_post_outlines.docx',
+        ad: 'ad_copies.docx'
     };
 
     const handleDownload = (fileType) => {
@@ -165,7 +168,7 @@ export default function DownloadPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                         >
-                            {['analysis', 'outlines'].map((tab) => (
+                            {['analysis', 'outlines', 'ad'].map((tab) => (
                                 <motion.button
                                     key={tab}
                                     onClick={() => setActiveMainTab(tab)}
@@ -176,7 +179,7 @@ export default function DownloadPage() {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    {tab === 'analysis' ? 'SEO Analysis' : 'Blog Outlines'}
+                                    {tab === 'analysis' ? 'SEO Analysis' : tab === 'outlines' ? 'Blog Outlines' : 'Ad Copies'}
                                 </motion.button>
                             ))}
                         </motion.nav>
@@ -204,7 +207,7 @@ export default function DownloadPage() {
                                         {markdownContent.analysis}
                                     </ReactMarkdown>
                                 </div>
-                            ) : (
+                            ) : activeMainTab === 'outlines' ? (
                                 // Blog Outlines Content
                                 <div>
                                     {/* Blog Outline Tabs */}
@@ -269,6 +272,18 @@ export default function DownloadPage() {
                                         </motion.div>
                                     </AnimatePresence>
                                 </div>
+                            ) : (
+                                // Ad Copies Content
+                                <div className="prose max-w-none">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            a: CustomLink
+                                        }}
+                                    >
+                                        {markdownContent.ad}
+                                    </ReactMarkdown>
+                                </div>
                             )}
                         </motion.div>
                     </AnimatePresence>
@@ -287,7 +302,7 @@ export default function DownloadPage() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >
-                            <span>Download {activeMainTab === 'analysis' ? 'Analysis' : 'Outlines'}</span>
+                            <span>Download {activeMainTab === 'analysis' ? 'Analysis' : activeMainTab === 'outlines' ? 'Outlines' : 'Ad Copies'}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 101.414 1.414l-3 3a1 1 0 00-1.414 0l-3-3a1 1 0 000-1.414z" clipRule="evenodd" />
                             </svg>

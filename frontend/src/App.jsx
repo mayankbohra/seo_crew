@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { stepTimings, totalDuration, progressSteps } from './config/progress';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
+import Header from './components/common/Header';
 
 // Separate component for home page content
 function HomeContent({ showForm, processing, currentStep, onGetStarted, onSubmit, onBack }) {
@@ -104,27 +105,24 @@ function MainContent() {
     };
 
     return (
-        <div>
-            <button
-                onClick={signOut}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
-            >
-                Sign Out
-            </button>
-            <Routes>
-                <Route path="/" element={
-                    <HomeContent
-                        showForm={showForm}
-                        processing={processing}
-                        currentStep={currentStep}
-                        onGetStarted={() => setShowForm(true)}
-                        onSubmit={handleSubmit}
-                        onBack={() => setShowForm(false)}
-                    />
-                } />
-                <Route path="/download" element={<DownloadPage />} />
-                <Route path="/generate-blog" element={<BlogGenerationForm />} />
-            </Routes>
+        <div className="min-h-screen bg-gray-50">
+            <Header />
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <Routes>
+                    <Route path="/" element={
+                        <HomeContent
+                            showForm={showForm}
+                            processing={processing}
+                            currentStep={currentStep}
+                            onGetStarted={() => setShowForm(true)}
+                            onSubmit={handleSubmit}
+                            onBack={() => setShowForm(false)}
+                        />
+                    } />
+                    <Route path="/download" element={<DownloadPage />} />
+                    <Route path="/generate-blog" element={<BlogGenerationForm />} />
+                </Routes>
+            </main>
         </div>
     );
 }

@@ -67,7 +67,7 @@ def run_crew(institution_name, domain_url):
             'domain_url': domain_url,
         }
 
-        fetch_data_from_spyfu(inputs['domain_url'], output_dir)
+        # fetch_data_from_spyfu(inputs['domain_url'], output_dir)
 
         # Initialize and run the crew
         crew = SeoCrew()
@@ -78,6 +78,7 @@ def run_crew(institution_name, domain_url):
         # Clean up markdown files
         remove_markdown_code_blocks(crew_dir / '1_analysis.md')
         remove_markdown_code_blocks(crew_dir / '2_blog_post_outlines.md')
+        remove_markdown_code_blocks(crew_dir / '3_ad_copies.md')
 
         markdown_content = {}
         # Read analysis markdown
@@ -95,6 +96,11 @@ def run_crew(institution_name, domain_url):
                 if not outlines_content.startswith('# Blog Post Outline'):
                     outlines_content = outlines_content.replace('# Blog Outline', '# Blog Post Outline')
                 markdown_content['outlines'] = outlines_content
+
+        ad_path = crew_dir / '3_ad_copies.md'
+        if ad_path.exists():
+            with open(ad_path, 'r', encoding='utf-8') as f:
+                markdown_content['ad'] = f.read()
 
         return {
             'status': 'success',

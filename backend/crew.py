@@ -1,6 +1,6 @@
 from crewai import Agent, Crew, Task, LLM
 from crewai.project import CrewBase, agent, crew, task, before_kickoff
-from crewai_tools import FileReadTool
+from crewai_tools import FileReadTool, SerperDevTool, WebsiteSearchTool
 from dotenv import load_dotenv
 from pathlib import Path
 import os
@@ -80,6 +80,24 @@ class SeoCrew():
 			verbose=True
 		)
 
+	@agent
+	def ad_copy_specialist_agent(self) -> Agent:
+		return Agent(
+			config=self.agents_config['ad_copy_specialist'],
+			tools=[
+				FileReadTool(
+					name="Read rankings data",
+					description="Read the rankings.json file for keyword analysis",
+					file_path=self.output_dir / 'data' / 'competitor_rankings.json',
+					encoding='utf-8',
+					errors='ignore'
+				),
+				SerperDevTool(),  # For analyzing competitor ads
+				WebsiteSearchTool()  # For researching institution details
+			],
+			llm=anthropic,  # Using Anthropic for better creative writing
+			verbose=True
+		)
 
 	@task
 	def analyze_keyword_rankings_data_task(self) -> Task:
@@ -96,6 +114,18 @@ class SeoCrew():
 			agent=self.blog_outline_strategist_agent(),
 			context=[self.analyze_keyword_rankings_data_task()],
 			output_file=str(self.output_dir / 'crew' / '2_blog_post_outlines.md')
+		)
+
+	@task
+	def generate_ad_copies_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['generate_ad_copies'],
+			agent=self.ad_copy_specialist_agent(),
+			context=[
+				self.analyze_keyword_rankings_data_task(),
+				self.generate_blog_post_outlines_task()
+			],
+			output_file=str(self.output_dir / 'crew' / '3_ad_copies.md')
 		)
 
 	@crew

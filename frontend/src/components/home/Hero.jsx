@@ -17,13 +17,6 @@ export default function Hero({ onGetStarted }) {
                 >
                     Generate Analysis & Outlines
                 </button>
-                <button
-                    onClick={() => window.location.href = '/generate-blog'}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg
-                             hover:bg-green-700 transition-colors"
-                >
-                    Generate Blog Posts
-                </button>
             </div>
         </div>
     );

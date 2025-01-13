@@ -115,19 +115,6 @@ export default function InstituteForm({ onSubmit, onBack }) {
                         </div>
                     </form>
                 </motion.div>
-
-                {/* Info Section */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="mt-8 text-center text-sm text-gray-500"
-                >
-                    <p>
-                        This process will analyze your competitors and generate SEO-optimized
-                        content tailored for your institution.
-                    </p>
-                </motion.div>
             </motion.div>
         </div>
     )
