@@ -14,6 +14,7 @@ import { stepTimings, totalDuration, progressSteps } from './config/progress';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
 import Header from './components/common/Header';
+import SetPassword from './components/auth/SetPassword';
 
 // Separate component for home page content
 function HomeContent({ showForm, processing, currentStep, onGetStarted, onSubmit, onBack }) {
@@ -121,6 +122,7 @@ function MainContent() {
                     } />
                     <Route path="/download" element={<DownloadPage />} />
                     <Route path="/generate-blog" element={<BlogGenerationForm />} />
+                    <Route path="/set-password" element={<SetPassword />} />
                 </Routes>
             </main>
         </div>
