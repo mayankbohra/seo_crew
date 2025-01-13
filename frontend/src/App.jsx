@@ -39,6 +39,7 @@ function MainContent() {
     const [simulationComplete, setSimulationComplete] = useState(false);
     const [backendData, setBackendData] = useState(null);
     const navigate = useNavigate();
+    const { signOut } = useAuth();
 
     // Effect to handle navigation when both simulation and backend are ready
     useEffect(() => {
@@ -103,64 +104,111 @@ function MainContent() {
     };
 
     return (
-        <Routes>
-            <Route path="/" element={
-                <HomeContent
-                    showForm={showForm}
-                    processing={processing}
-                    currentStep={currentStep}
-                    onGetStarted={() => setShowForm(true)}
-                    onSubmit={handleSubmit}
-                    onBack={() => setShowForm(false)}
-                />
-            } />
-            <Route path="/download" element={<DownloadPage />} />
-            <Route path="/generate-blog" element={<BlogGenerationForm />} />
-        </Routes>
+        <div>
+            <button
+                onClick={signOut}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
+            >
+                Sign Out
+            </button>
+            <Routes>
+                <Route path="/" element={
+                    <HomeContent
+                        showForm={showForm}
+                        processing={processing}
+                        currentStep={currentStep}
+                        onGetStarted={() => setShowForm(true)}
+                        onSubmit={handleSubmit}
+                        onBack={() => setShowForm(false)}
+                    />
+                } />
+                <Route path="/download" element={<DownloadPage />} />
+                <Route path="/generate-blog" element={<BlogGenerationForm />} />
+            </Routes>
+        </div>
     );
 }
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
-    const { user, loading } = useAuth();
+    const { user, loading, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!loading && !isAuthenticated) {
+            navigate('/login', { replace: true });
+        }
+    }, [loading, isAuthenticated, navigate]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+        );
     }
 
-    if (!user) {
-        return <Navigate to="/login" />;
+    if (!isAuthenticated) {
+        return null; // Will be redirected by useEffect
     }
 
     return children;
 };
 
-// App component with router
+// Public Route component
+const PublicRoute = ({ children }) => {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
+
+    if (user) {
+        return <Navigate to="/" replace />;
+    }
+
+    return children;
+};
+
 function App() {
     return (
         <ErrorBoundary>
             <AuthProvider>
                 <Router>
-                    <div className="min-h-screen bg-gray-50">
-                        <Routes>
-                            <Route path="/login" element={<LoginPage />} />
-                            <Route path="/" element={
-                                <ProtectedRoute>
-                                    <MainContent />
-                                </ProtectedRoute>
-                            } />
-                            <Route path="/download" element={
-                                <ProtectedRoute>
-                                    <DownloadPage />
-                                </ProtectedRoute>
-                            } />
-                            <Route path="/generate-blog" element={
-                                <ProtectedRoute>
-                                    <BlogGenerationForm />
-                                </ProtectedRoute>
-                            } />
-                        </Routes>
-                    </div>
+                    <Routes>
+                        {/* Default route - redirects to login if not authenticated */}
+                        <Route path="/" element={
+                            <ProtectedRoute>
+                                <MainContent />
+                            </ProtectedRoute>
+                        } />
+
+                        {/* Public Route - Login */}
+                        <Route path="/login" element={
+                            <PublicRoute>
+                                <LoginPage />
+                            </PublicRoute>
+                        } />
+
+                        {/* Other Protected Routes */}
+                        <Route path="/download" element={
+                            <ProtectedRoute>
+                                <DownloadPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/generate-blog" element={
+                            <ProtectedRoute>
+                                <BlogGenerationForm />
+                            </ProtectedRoute>
+                        } />
+
+                        {/* Catch all route - redirect to login */}
+                        <Route path="*" element={<Navigate to="/login" replace />} />
+                    </Routes>
                 </Router>
             </AuthProvider>
         </ErrorBoundary>

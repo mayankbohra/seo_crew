@@ -7,7 +7,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: window.localStorage
+        detectSessionInUrl: false,
+        storage: window.localStorage,
+        storageKey: 'seo-crew-auth-token'
     }
 })

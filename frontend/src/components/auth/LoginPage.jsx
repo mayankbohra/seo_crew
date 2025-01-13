@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -9,6 +10,14 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { user } = useAuth();
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (user) {
+            navigate('/', { replace: true });
+        }
+    }, [user, navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -24,9 +33,10 @@ export default function LoginPage() {
             if (error) throw error;
 
             if (data?.user) {
-                navigate('/');
+                navigate('/', { replace: true });
             }
         } catch (error) {
+            console.error('Login error:', error);
             setError(error.message);
         } finally {
             setLoading(false);

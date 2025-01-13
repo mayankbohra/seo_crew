@@ -9,18 +9,32 @@ export const AuthProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Check active sessions and sets the user
+        // Clear any existing session data on mount
+        localStorage.removeItem('supabase.auth.token');
+
         const initializeAuth = async () => {
             try {
+                // Force check session
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-                if (sessionError) throw sessionError;
+                if (sessionError) {
+                    throw sessionError;
+                }
 
-                setUser(session?.user ?? null);
+                // Only set user if we have a valid session
+                if (session?.user && session?.access_token) {
+                    setUser(session.user);
+                } else {
+                    setUser(null);
+                }
 
-                // Listen for changes on auth state
-                const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-                    setUser(session?.user ?? null);
+                // Listen for auth changes
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN' && session?.user) {
+                        setUser(session.user);
+                    } else if (event === 'SIGNED_OUT') {
+                        setUser(null);
+                    }
                 });
 
                 return () => {
@@ -29,6 +43,7 @@ export const AuthProvider = ({ children }) => {
             } catch (error) {
                 console.error('Auth error:', error);
                 setError(error.message);
+                setUser(null);
             } finally {
                 setLoading(false);
             }
@@ -37,8 +52,26 @@ export const AuthProvider = ({ children }) => {
         initializeAuth();
     }, []);
 
+    // Provide sign out functionality
+    const signOut = async () => {
+        try {
+            await supabase.auth.signOut();
+            setUser(null);
+        } catch (error) {
+            console.error('Sign out error:', error);
+        }
+    };
+
+    const value = {
+        user,
+        loading,
+        error,
+        isAuthenticated: !!user,
+        signOut
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, error }}>
+        <AuthContext.Provider value={value}>
             {!loading && children}
         </AuthContext.Provider>
     );
