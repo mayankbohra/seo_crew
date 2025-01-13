@@ -21,7 +21,7 @@ CORS(app, resources={
         "allow_headers": ["Content-Type", "Authorization"],
         "expose_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True,
-        "max_age": 600  # Cache preflight requests for 10 minutes
+        "max_age": 600
     }
 })
 

@@ -72,10 +72,12 @@ generate_blog_post_outlines:
     - Content must be factual, non-controversial and focused on Jaipuria's expertise
 
     Add "---" after each blog outline to separate them.
+    Do not write any thing other than the blog outlines.
 
 generate_ad_copies:
   description: >
-    Create high-performing ad copies for both Google Ads and Meta Ads platforms:
+    Create high-performing ad copies for both Google Ads and Meta Ads platforms that drives enrollments at
+    Jaipuria Institute of Management:
 
     1. First, analyze the keyword data from rankings.json to identify:
        - High commercial intent keywords
