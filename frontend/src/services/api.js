@@ -1,12 +1,16 @@
 const API_URL = import.meta.env.VITE_API_URL;
+import { supabase } from '../lib/supabase';
 
 export const startCrewExecution = async (data) => {
     try {
+        const { data: { session } } = await supabase.auth.getSession();
+
         const response = await fetch(`${API_URL}/run`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'Authorization': `Bearer ${session?.access_token}`
             },
             credentials: 'include',
             body: JSON.stringify(data)
