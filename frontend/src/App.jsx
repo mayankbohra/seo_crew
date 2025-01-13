@@ -180,6 +180,20 @@ function App() {
             <AuthProvider>
                 <Router>
                     <Routes>
+                        {/* Auth confirmation route */}
+                        <Route path="/auth/confirm" element={
+                            <PublicRoute>
+                                <SetPassword />
+                            </PublicRoute>
+                        } />
+
+                        {/* Set password route */}
+                        <Route path="/set-password" element={
+                            <PublicRoute>
+                                <SetPassword />
+                            </PublicRoute>
+                        } />
+
                         {/* Default route - redirects to login if not authenticated */}
                         <Route path="/" element={
                             <ProtectedRoute>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
@@ -10,6 +10,28 @@ export default function SetPassword() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+
+    // Get the token from URL parameters
+    useEffect(() => {
+        const handleTokenConfirmation = async () => {
+            const token = searchParams.get('token');
+            if (token) {
+                try {
+                    const { error } = await supabase.auth.verifyOtp({
+                        token_hash: token,
+                        type: 'invite'
+                    });
+                    if (error) throw error;
+                } catch (error) {
+                    console.error('Error verifying token:', error);
+                    setError('Invalid or expired invitation link');
+                    setTimeout(() => navigate('/login'), 3000);
+                }
+            }
+        };
+
+        handleTokenConfirmation();
+    }, [searchParams, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,8 +56,11 @@ export default function SetPassword() {
 
             if (error) throw error;
 
-            // Password set successfully
-            navigate('/');
+            // Show success message and redirect to login
+            setError(null);
+            alert('Password set successfully! Please login with your new password.');
+            await supabase.auth.signOut(); // Sign out after setting password
+            navigate('/login');
         } catch (error) {
             setError(error.message);
         } finally {
