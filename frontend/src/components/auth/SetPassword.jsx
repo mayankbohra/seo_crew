@@ -17,26 +17,20 @@ export default function SetPassword() {
             const type = searchParams.get('type');
             const next = searchParams.get('next');
 
-            if (!tokenHash || type !== 'invite' || next !== '/set-password') {
+            if (!tokenHash || type !== 'invite') {
                 setError('Invalid invitation link');
                 setTimeout(() => navigate('/login'), 3000);
                 return;
             }
 
             try {
-                // First verify the token
-                const { error: verifyError, data } = await supabase.auth.verifyOtp({
+                // Only verify the token, don't sign out yet
+                const { error: verifyError } = await supabase.auth.verifyOtp({
                     token_hash: tokenHash,
-                    type: 'invite',
-                    options: {
-                        redirectTo: `${window.location.origin}/set-password`
-                    }
+                    type: 'invite'
                 });
 
                 if (verifyError) throw verifyError;
-
-                // Immediately sign out to prevent auto-login
-                await supabase.auth.signOut();
 
             } catch (error) {
                 console.error('Error verifying token:', error);
@@ -65,26 +59,14 @@ export default function SetPassword() {
         setLoading(true);
 
         try {
-            // First verify the token again
-            const tokenHash = searchParams.get('token_hash');
-            const { error: verifyError } = await supabase.auth.verifyOtp({
-                token_hash: tokenHash,
-                type: 'invite',
-                options: {
-                    redirectTo: `${window.location.origin}/set-password`
-                }
-            });
-
-            if (verifyError) throw verifyError;
-
-            // Then update the password
+            // Update the password
             const { error: updateError } = await supabase.auth.updateUser({
                 password: password
             });
 
             if (updateError) throw updateError;
 
-            // Sign out to ensure clean state
+            // Sign out after successful password update
             await supabase.auth.signOut();
 
             // Show success message and redirect to login
