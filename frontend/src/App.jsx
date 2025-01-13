@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Hero from './components/home/Hero';
 import Features from './components/home/Features';
@@ -158,6 +158,7 @@ const ProtectedRoute = ({ children }) => {
 // Public Route component
 const PublicRoute = ({ children }) => {
     const { user, loading } = useAuth();
+    const location = useLocation();
 
     if (loading) {
         return (
@@ -165,6 +166,11 @@ const PublicRoute = ({ children }) => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
             </div>
         );
+    }
+
+    // Allow access to auth confirmation route even if user is logged in
+    if (location.pathname.startsWith('/auth/confirm')) {
+        return children;
     }
 
     if (user) {

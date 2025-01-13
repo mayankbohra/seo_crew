@@ -9,6 +9,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         autoRefreshToken: true,
         detectSessionInUrl: false,
         storage: window.localStorage,
-        storageKey: 'seo-crew-auth-token'
+        storageKey: 'seo-crew-auth-token',
+        flowType: 'pkce'
     }
 })
