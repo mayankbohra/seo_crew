@@ -14,19 +14,30 @@ export default function SetPassword() {
     // Get the token from URL parameters
     useEffect(() => {
         const handleTokenConfirmation = async () => {
-            const token = searchParams.get('token');
-            if (token) {
-                try {
-                    const { error } = await supabase.auth.verifyOtp({
-                        token_hash: token,
-                        type: 'invite'
-                    });
-                    if (error) throw error;
-                } catch (error) {
-                    console.error('Error verifying token:', error);
-                    setError('Invalid or expired invitation link');
-                    setTimeout(() => navigate('/login'), 3000);
-                }
+            const tokenHash = searchParams.get('token_hash');
+            const type = searchParams.get('type');
+
+            if (!tokenHash || type !== 'invite') {
+                setError('Invalid invitation link');
+                setTimeout(() => navigate('/login'), 3000);
+                return;
+            }
+
+            try {
+                // Verify the token without auto-confirming
+                const { error } = await supabase.auth.verifyOtp({
+                    token_hash: tokenHash,
+                    type: 'invite',
+                    options: {
+                        redirectTo: null // Prevent auto-redirect
+                    }
+                });
+
+                if (error) throw error;
+            } catch (error) {
+                console.error('Error verifying token:', error);
+                setError('Invalid or expired invitation link');
+                setTimeout(() => navigate('/login'), 3000);
             }
         };
 
@@ -50,18 +61,21 @@ export default function SetPassword() {
         setLoading(true);
 
         try {
+            // Update the user's password
             const { error } = await supabase.auth.updateUser({
                 password: password
             });
 
             if (error) throw error;
 
+            // Sign out the user to force them to login with their new password
+            await supabase.auth.signOut();
+
             // Show success message and redirect to login
-            setError(null);
             alert('Password set successfully! Please login with your new password.');
-            await supabase.auth.signOut(); // Sign out after setting password
-            navigate('/login');
+            navigate('/login', { replace: true });
         } catch (error) {
+            console.error('Error setting password:', error);
             setError(error.message);
         } finally {
             setLoading(false);
@@ -87,13 +101,13 @@ export default function SetPassword() {
                     transition={{ delay: 0.2 }}
                     className="bg-white rounded-xl shadow-xl p-8 border border-gray-100"
                 >
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {error && (
-                            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-                                {error}
-                            </div>
-                        )}
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
+                            {error}
+                        </div>
+                    )}
 
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                 Password
