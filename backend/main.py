@@ -44,7 +44,6 @@ def remove_markdown_code_blocks(file_path):
     if file_path.exists():
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        # Remove ```markdown and ``` tags
         content = content.replace('```markdown', '').replace('```', '')
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
@@ -67,7 +66,7 @@ def run_crew(institution_name, domain_url):
             'domain_url': domain_url,
         }
 
-        # fetch_data_from_spyfu(inputs['domain_url'], output_dir)
+        fetch_data_from_spyfu(inputs['domain_url'], output_dir)
 
         # Initialize and run the crew
         crew = SeoCrew()
@@ -81,7 +80,7 @@ def run_crew(institution_name, domain_url):
         remove_markdown_code_blocks(crew_dir / '3_blog_post_outlines.md')
 
         markdown_content = {}
-        # Read analysis markdown
+        
         analysis_path = crew_dir / '1_analysis.md'
         if analysis_path.exists():
             with open(analysis_path, 'r', encoding='utf-8') as f:
@@ -92,7 +91,6 @@ def run_crew(institution_name, domain_url):
             with open(ad_path, 'r', encoding='utf-8') as f:
                 markdown_content['ad'] = f.read()
 
-        # Read outlines markdown
         outlines_path = crew_dir / '3_blog_post_outlines.md'
         if outlines_path.exists():
             with open(outlines_path, 'r', encoding='utf-8') as f:
