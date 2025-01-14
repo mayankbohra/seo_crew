@@ -104,14 +104,14 @@ def run():
 
         # Convert outlines
         outlines_filename = 'blog_post_outlines.docx'
-        outlines_md = crew_dir / '2_blog_post_outlines.md'
+        outlines_md = crew_dir / '3_blog_post_outlines.md'
         if outlines_md.exists():
             if convert_markdown_to_docx(outlines_md, outlines_filename):
                 docx_files['outlines'] = outlines_filename
 
         # Convert ad
         ad_filename = 'ad_copies.docx'
-        ad_md = crew_dir / '3_ad_copies.md'
+        ad_md = crew_dir / '2_ad_copies.md'
         if ad_md.exists():
             if convert_markdown_to_docx(ad_md, ad_filename):
                 docx_files['ad'] = ad_filename

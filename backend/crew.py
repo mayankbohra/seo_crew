@@ -6,6 +6,7 @@ from pathlib import Path
 import os
 
 load_dotenv()
+serper_api_key = os.getenv("SERPER_API_KEY")
 
 openai = LLM(
     model="gpt-4o",
@@ -64,23 +65,6 @@ class SeoCrew():
 	)
 
 	@agent
-	def blog_outline_strategist_agent(self) -> Agent:
-		return Agent(
-			config=self.agents_config['blog_outline_strategist'],
-			tools=[
-				FileReadTool(
-					name="Read rankings data",
-					description="Read the rankings.json file",
-					file_path=self.output_dir / 'data' / 'competitor_rankings.json',
-					encoding='utf-8',
-					errors='ignore'
-				)
-			],
-			llm=openai,
-			verbose=True
-		)
-
-	@agent
 	def ad_copy_specialist_agent(self) -> Agent:
 		return Agent(
 			config=self.agents_config['ad_copy_specialist'],
@@ -92,12 +76,39 @@ class SeoCrew():
 					encoding='utf-8',
 					errors='ignore'
 				),
-				SerperDevTool(),  # For analyzing competitor ads
-				WebsiteSearchTool()  # For researching institution details
+				SerperDevTool(),
+				WebsiteSearchTool()
 			],
-			llm=anthropic,  # Using Anthropic for better creative writing
+			llm=anthropic,
 			verbose=True
 		)
+
+	@agent
+	def blog_outline_strategist_agent(self) -> Agent:
+		return Agent(
+			config=self.agents_config['blog_outline_strategist'],
+			tools=[
+                FileReadTool(
+					name="Read ad copies",
+					description="Read the ad_copies.md file",
+					file_path=self.output_dir / 'crew' / '2_ad_copies.md',
+					encoding='utf-8',
+					errors='ignore'
+				),
+				FileReadTool(
+					name="Read rankings data",
+					description="Read the rankings.json file",
+					file_path=self.output_dir / 'data' / 'competitor_rankings.json',
+					encoding='utf-8',
+					errors='ignore'
+				),
+				SerperDevTool(),
+				WebsiteSearchTool()
+			],
+			llm=openai,
+			verbose=True
+		)
+
 
 	@task
 	def analyze_keyword_rankings_data_task(self) -> Task:
@@ -108,25 +119,23 @@ class SeoCrew():
 		)
 
 	@task
-	def generate_blog_post_outlines_task(self) -> Task:
-		return Task(
-			config=self.tasks_config['generate_blog_post_outlines'],
-			agent=self.blog_outline_strategist_agent(),
-			context=[self.analyze_keyword_rankings_data_task()],
-			output_file=str(self.output_dir / 'crew' / '2_blog_post_outlines.md')
-		)
-
-	@task
 	def generate_ad_copies_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['generate_ad_copies'],
 			agent=self.ad_copy_specialist_agent(),
-			context=[
-				self.analyze_keyword_rankings_data_task(),
-				self.generate_blog_post_outlines_task()
-			],
-			output_file=str(self.output_dir / 'crew' / '3_ad_copies.md')
+			context=[self.analyze_keyword_rankings_data_task()],
+			output_file=str(self.output_dir / 'crew' / '2_ad_copies.md')
 		)
+
+	@task
+	def generate_blog_post_outlines_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['generate_blog_post_outlines'],
+			agent=self.blog_outline_strategist_agent(),
+			context=[self.analyze_keyword_rankings_data_task(), self.generate_ad_copies_task()],
+			output_file=str(self.output_dir / 'crew' / '3_blog_post_outlines.md')
+		)
+
 
 	@crew
 	def crew(self) -> Crew:

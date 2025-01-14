@@ -102,7 +102,7 @@ class SpyfuTool(BaseTool):
                 f"sortBy=SearchVolume&"
                 f"sortOrder=Descending&"
                 f"startingRow=1&"
-                f"pageSize=5&"
+                f"pageSize=10&"
                 f"countryCode=IN&"
             )
 
