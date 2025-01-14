@@ -97,7 +97,7 @@ class SpyfuTool(BaseTool):
             clean_domain = self._clean_domain(domain)
 
             url = (
-                f"/apis/serp_api/v2/seo/getJustMadeItKeywords?"
+                f"/apis/serp_api/v2/seo/getGainedRanksKeywords?"
                 f"query={clean_domain}&"
                 f"sortBy=SearchVolume&"
                 f"sortOrder=Descending&"

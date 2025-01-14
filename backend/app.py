@@ -42,12 +42,27 @@ def after_request(response):
 # Store active threads/processes
 active_processes = []
 
+def ensure_directories():
+    """Create necessary output directories if they don't exist"""
+    directories = [
+        'outputs',
+        'outputs/crew',
+        'outputs/data',
+        'outputs/doc',
+        'outputs/blogs'
+    ]
+
+    for dir_path in directories:
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
+
 def convert_markdown_to_docx(markdown_file, output_filename):
     """Convert markdown file to docx and save to outputs/doc"""
     try:
+        # Ensure directories exist
+        ensure_directories()
+
         # Setup output directory
         doc_dir = Path('outputs/doc')
-        doc_dir.mkdir(exist_ok=True)
         output_path = doc_dir / output_filename
 
         doc = Document()
@@ -56,7 +71,6 @@ def convert_markdown_to_docx(markdown_file, output_filename):
         doc.Dispose()
 
         print(f"✓ Saved to: {output_path}")
-
         return output_path
 
     except Exception as e:
@@ -67,7 +81,24 @@ def convert_markdown_to_docx(markdown_file, output_filename):
 def download_file(filename):
     """Endpoint to download converted files"""
     try:
+        # Ensure directories exist
+        ensure_directories()
+
         file_path = Path('outputs/doc') / filename
+
+        # Log the attempt
+        print(f"Attempting to download: {file_path}")
+
+        if not file_path.exists():
+            print(f"File not found: {file_path}")
+            return jsonify({
+                'status': 'error',
+                'message': f'File not found: {filename}'
+            }), 404
+
+        # Log successful file access
+        print(f"File found, sending: {file_path}")
+
         return send_file(
             file_path,
             as_attachment=True,
@@ -75,14 +106,18 @@ def download_file(filename):
             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
     except Exception as e:
+        print(f"Error in download_file: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': f'Error downloading file: {str(e)}'
-        }), 404
+        }), 500
 
 @app.route('/run', methods=['POST'])
 def run():
     try:
+        # Ensure directories exist
+        ensure_directories()
+
         data = request.json
         institution_name = data.get('institution_name')
         domain_url = data.get('domain_url')
@@ -95,31 +130,24 @@ def run():
         crew_dir = Path('outputs/crew')
         docx_files = {}
 
-        # Convert analysis
-        analysis_filename = 'analysis.docx'
-        analysis_md = crew_dir / '1_analysis.md'
-        if analysis_md.exists():
-            if convert_markdown_to_docx(analysis_md, analysis_filename):
-                docx_files['analysis'] = analysis_filename
-
-        # Convert outlines
-        outlines_filename = 'blog_post_outlines.docx'
-        outlines_md = crew_dir / '3_blog_post_outlines.md'
-        if outlines_md.exists():
-            if convert_markdown_to_docx(outlines_md, outlines_filename):
-                docx_files['outlines'] = outlines_filename
-
-        # Convert ad
-        ad_filename = 'ad_copies.docx'
-        ad_md = crew_dir / '2_ad_copies.md'
-        if ad_md.exists():
-            if convert_markdown_to_docx(ad_md, ad_filename):
-                docx_files['ad'] = ad_filename
+        # Check if files exist before conversion
+        for file_info in [
+            ('1_analysis.md', 'analysis.docx', 'analysis'),
+            ('3_blog_post_outlines.md', 'blog_post_outlines.docx', 'outlines'),
+            ('2_ad_copies.md', 'ad_copies.docx', 'ad')
+        ]:
+            md_file = crew_dir / file_info[0]
+            if md_file.exists():
+                print(f"Converting {md_file} to {file_info[1]}")
+                if convert_markdown_to_docx(md_file, file_info[1]):
+                    docx_files[file_info[2]] = file_info[1]
+            else:
+                print(f"Warning: {md_file} not found")
 
         return jsonify({
             'status': 'success',
-            'markdown': result.get('markdown', {}),  # Pass markdown content
-            'docxFiles': docx_files  # Pass docx filenames
+            'markdown': result.get('markdown', {}),
+            'docxFiles': docx_files
         })
 
     except Exception as e:
