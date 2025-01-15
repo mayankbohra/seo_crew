@@ -15,6 +15,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
 import Header from './components/common/Header';
 import SetPassword from './components/auth/SetPassword';
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
 
 // Separate component for home page content
 function HomeContent({ showForm, processing, currentStep, onGetStarted, onSubmit, onBack }) {
@@ -123,6 +125,16 @@ function MainContent() {
                     <Route path="/download" element={<DownloadPage />} />
                     <Route path="/generate-blog" element={<BlogGenerationForm />} />
                     <Route path="/set-password" element={<SetPassword />} />
+                    <Route path="/forgot-password" element={
+                        <PublicRoute>
+                            <ForgotPassword />
+                        </PublicRoute>
+                    } />
+                    <Route path="/reset-password" element={
+                        <PublicRoute>
+                            <ResetPassword />
+                        </PublicRoute>
+                    } />
                 </Routes>
             </main>
         </div>

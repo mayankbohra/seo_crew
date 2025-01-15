@@ -34,9 +34,9 @@ analyze_keyword_rankings_data:
 
   expected_output: >
     ALWAYS provide a detailed markdown report containing:
-    1. Different data tables for all the competitors showing the keyword metrics and patterns
+    1. Different data tables for all the competitors showing ALL the keyword metrics and patterns
     2. Data tables showing user keyword performance
-    3. Comparative analysis between user and competitor rankings
+    3. Comparative analysis between user and ALL the competitors rankings
     4. Strategic recommendations backed by specific data points
     5. All analysis based strictly on data from competitor_rankings.json and user_rankings.json
 
