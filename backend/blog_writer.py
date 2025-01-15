@@ -27,6 +27,9 @@ def generate_blog(blog_outline):
         7. Follow the exact structure from the outline
         8. Make content factual and avoid controversial topics
         9. Don't compare with or mention other institutions
+        10. Write compelling meta description to boost Click-through rate (CTR)
+        11. Content should meet Experience, Expertise, Authoritativeness, and Trustworthiness (EEAT) guidelines
+        12. Add enough context to answer the query and make it more engaging and helpful for the reader.
 
         Blog Outline:
         {outline}

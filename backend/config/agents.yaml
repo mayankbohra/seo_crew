@@ -48,6 +48,8 @@ ad_copy_specialist:
 
     1. Analyze the target keywords and competitor data:
        - Review keyword metrics from rankings.json
+       - Use SerperDevTool to research competitor ad strategies
+       - Use WebsiteSearchTool to analyze competitor landing pages
        - Identify high-intent keywords for ad targeting
        - Understand search intent and competition
 
@@ -95,6 +97,8 @@ blog_outline_strategist:
 
     3. For each selected keyword and its corresponding ad copy:
        - Get the exact topRankedUrl from the rankings data
+       - Use SerperDevTool to analyze top-ranking content
+       - Use WebsiteSearchTool to research competitor content structure
        - Create a detailed blog outline for Jaipuria Institute of Management designed to outrank it
        - Ensure content is factual, balanced and focused only on Jaipuria's expertise
        - Avoid controversial topics or comparisons with other institutions

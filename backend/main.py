@@ -80,7 +80,7 @@ def run_crew(institution_name, domain_url):
         remove_markdown_code_blocks(crew_dir / '3_blog_post_outlines.md')
 
         markdown_content = {}
-        
+
         analysis_path = crew_dir / '1_analysis.md'
         if analysis_path.exists():
             with open(analysis_path, 'r', encoding='utf-8') as f:
@@ -116,4 +116,3 @@ if __name__ == "__main__":
         institution_name="Jaipuria Institute of Management",
         domain_url="jaipuria.ac.in"
     )
-    print(result)

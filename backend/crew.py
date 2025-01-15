@@ -105,7 +105,7 @@ class SeoCrew():
 				SerperDevTool(),
 				WebsiteSearchTool()
 			],
-			llm=openai,
+			llm=anthropic,
 			verbose=True
 		)
 

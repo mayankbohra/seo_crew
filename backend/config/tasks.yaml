@@ -55,6 +55,10 @@ generate_ad_copies:
        - High commercial intent keywords
        - Keywords with good search volume
        - Keywords relevant to student recruitment
+       Then use SerperDevTool and WebsiteSearchTool to:
+       - Research competitor ad strategies
+       - Analyze competitor landing pages
+       - Understand search intent
 
     2. For Google Ads, create 5 ad variations that:
        - Follow the Responsive Search Ads format
@@ -109,6 +113,8 @@ generate_blog_post_outlines:
        - Keyword difficulty is low
     3. Then, for each selected keyword and ad copy for that keyword:
        - Get its exact topRankedUrl from the rankings data
+       - Use SerperDevTool to analyze top-ranking content
+       - Use WebsiteSearchTool to research competitor content structure
        - create a detailed blog outline for 'Jaipuria Institute of Management', that will outrank it
        - ensure content is factual, balanced and avoids controversial topics
        - focus only on Jaipuria Institute of Management's offerings and expertise
