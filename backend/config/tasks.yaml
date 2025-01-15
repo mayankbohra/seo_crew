@@ -121,7 +121,7 @@ generate_blog_post_outlines:
     For ad copies and keyword data, use ONLY the data from the ad_copies.md and competitor_rankings.json files.
   expected_output: >
     A markdown document with ALL the 5 (1-5) blog post outlines tailored ONLY for 'Jaipuria Institute of Management'.
-    Don't promote, compare with, or mention any other institution's name.
+    DON'T promote, compare with, or mention any other institution's name.
     Each outline must start with:
     # Blog Outline
     ## Keyword data:
