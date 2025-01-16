@@ -1,11 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { supabase } from '../lib/supabase';
 
-export const startCrewExecution = async (data) => {
+export const runAnalysis = async (data) => {
     try {
         const { data: { session } } = await supabase.auth.getSession();
 
-        const response = await fetch(`${API_URL}/run`, {
+        const response = await fetch(`${API_URL}/run/analysis`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -16,8 +16,81 @@ export const startCrewExecution = async (data) => {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (!response.ok) {
-            throw new Error('HTTP error! status: ' + response.status);
+            throw new Error(result.message || 'Analysis failed');
+        }
+
+        if (result.status === 'error') {
+            throw new Error(result.message);
+        }
+
+        return result;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw new Error(error.message || 'Failed to run analysis');
+    }
+};
+
+export const getKeywords = async () => {
+    try {
+        const response = await fetch(`${API_URL}/keywords`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+export const saveKeywords = async (keywords) => {
+    try {
+        const response = await fetch(`${API_URL}/keywords/save`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ keywords })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+export const runSeo = async (data) => {
+    try {
+        const response = await fetch(`${API_URL}/run/seo`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const result = await response.json();

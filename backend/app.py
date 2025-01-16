@@ -1,12 +1,18 @@
 from flask import Flask, request, jsonify, send_file, make_response
+from spire.doc import Document, FileFormat
 from flask_cors import CORS, cross_origin
-from main import run_crew
-import os
+from dotenv import load_dotenv
 from pathlib import Path
 import atexit
-from spire.doc import Document, FileFormat
+import os
+
 from blog_writer import generate_blog
-from dotenv import load_dotenv
+from main import (
+    run_analysis_crew,
+    get_available_keywords,
+    save_keyword_details,
+    run_seo_crew
+)
 
 # Load environment variables
 load_dotenv()
@@ -112,8 +118,9 @@ def download_file(filename):
             'message': f'Error downloading file: {str(e)}'
         }), 500
 
-@app.route('/run', methods=['POST'])
-def run():
+
+@app.route('/run/analysis', methods=['POST'])
+def run_analysis():
     try:
         # Ensure directories exist
         ensure_directories()
@@ -122,9 +129,115 @@ def run():
         institution_name = data.get('institution_name')
         domain_url = data.get('domain_url')
 
-        # Run the crew
-        result = run_crew(institution_name, domain_url)
-        print("Crew run complete")
+        if not institution_name or not domain_url:
+            return jsonify({
+                'status': 'error',
+                'message': 'Missing required fields'
+            }), 400
+
+        # Run the analysis crew
+        try:
+            result = run_analysis_crew(institution_name, domain_url)
+            print("Analysis crew run complete")
+
+            # Convert markdown files to docx
+            crew_dir = Path('outputs/crew')
+            docx_files = {}
+
+            # Check if files exist before conversion
+            for file_info in [
+                ('1_analysis.md', 'analysis.docx', 'analysis')
+            ]:
+                md_file = crew_dir / file_info[0]
+                if md_file.exists():
+                    print(f"Converting {md_file} to {file_info[1]}")
+                    if convert_markdown_to_docx(md_file, file_info[1]):
+                        docx_files[file_info[2]] = file_info[1]
+                else:
+                    print(f"Warning: {md_file} not found")
+
+            return jsonify({
+                'status': 'success',
+                'message': 'Analysis completed successfully',
+                'docxFiles': docx_files,
+                'markdown': result.get('markdown', {})
+            })
+
+        except Exception as e:
+            print(f"Error during analysis: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': f'Analysis error: {str(e)}'
+            }), 500
+
+    except Exception as e:
+        print(f"Error in /run/analysis: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/keywords', methods=['GET'])
+def get_keywords():
+    try:
+        # Get available keywords
+        keywords = get_available_keywords()
+
+        return jsonify({
+            'status': 'success',
+            'keywords': keywords
+        })
+
+    except Exception as e:
+        print(f"Error in /keywords: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/keywords/save', methods=['POST'])
+def save_keywords():
+    try:
+        data = request.json
+        selected_keywords = data.get('keywords', [])
+
+        if not selected_keywords:
+            return jsonify({
+                'status': 'error',
+                'message': 'No keywords provided'
+            }), 400
+
+        # Save details for selected keywords
+        save_keyword_details(selected_keywords)
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Keyword details saved successfully'
+        })
+
+    except Exception as e:
+        print(f"Error in /keywords/save: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/run/seo', methods=['POST'])
+def run_seo():
+    try:
+        # Ensure directories exist
+        ensure_directories()
+
+        data = request.json
+        institution_name = data.get('institution_name')
+        domain_url = data.get('domain_url')
+
+        # Run the SEO crew
+        result = run_seo_crew(institution_name, domain_url)
+        print("SEO crew run complete")
 
         # Convert markdown files to docx
         crew_dir = Path('outputs/crew')
@@ -132,9 +245,8 @@ def run():
 
         # Check if files exist before conversion
         for file_info in [
-            ('1_analysis.md', 'analysis.docx', 'analysis'),
-            ('3_blog_post_outlines.md', 'blog_post_outlines.docx', 'outlines'),
-            ('2_ad_copies.md', 'ad_copies.docx', 'ad')
+            ('2_ad_copies.md', 'ad_copies.docx', 'ad'),
+            ('3_blog_post_outlines.md', 'blog_post_outlines.docx', 'outlines')
         ]:
             md_file = crew_dir / file_info[0]
             if md_file.exists():
@@ -151,7 +263,7 @@ def run():
         })
 
     except Exception as e:
-        print(f"Error in /run: {str(e)}")
+        print(f"Error in /run/seo: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': str(e)

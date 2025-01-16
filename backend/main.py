@@ -40,6 +40,42 @@ def fetch_data_from_spyfu(domain_url, output_dir):
     with open(output_dir / 'data' / 'competitor_rankings.json', 'w', encoding='utf-8') as f:
         json.dump(rankings_data, f, indent=2, ensure_ascii=False)
 
+
+def run_analysis_crew(institution_name, domain_url):
+    """Run the analysis crew"""
+    try:
+        # Create output directory
+        output_dir = Path('outputs')
+        output_dir.mkdir(exist_ok=True)
+        (output_dir / 'data').mkdir(exist_ok=True)
+
+        print("Fetching SpyFu data...")
+        fetch_data_from_spyfu(domain_url, output_dir)
+
+        crew = AnalysisCrew()
+        crew.setup({
+            'institution_name': institution_name,
+            'domain_url': domain_url,
+        })
+        crew.crew().kickoff()
+
+        markdown_content = {}
+        analysis_path = output_dir / 'crew' / '1_analysis.md'
+        if analysis_path.exists():
+            with open(analysis_path, 'r', encoding='utf-8') as f:
+                markdown_content['analysis'] = f.read()
+
+        return {
+            'status': 'success',
+            'message': 'Crew execution completed successfully',
+            'markdown': markdown_content
+        }
+
+    except Exception as e:
+        print(f"Error running analysis crew: {str(e)}")
+        raise
+
+
 def get_available_keywords():
     """Get list of all unique keywords from competitor rankings"""
     try:
@@ -56,7 +92,8 @@ def get_available_keywords():
         print(f"Error getting keywords: {str(e)}")
         return []
 
-def get_keyword_details(selected_keywords):
+
+def save_keyword_details(selected_keywords):
     """Get full details for selected keywords"""
     try:
         with open('outputs/data/competitor_rankings.json', 'r', encoding='utf-8') as f:
@@ -69,38 +106,50 @@ def get_keyword_details(selected_keywords):
                     if result['keyword'] not in keyword_details:
                         keyword_details[result['keyword']] = result
 
-        return keyword_details
+        # save keyword details to json file
+        with open('outputs/keyword_details.json', 'w', encoding='utf-8') as f:
+            json.dump(keyword_details, f, indent=2, ensure_ascii=False)
+
     except Exception as e:
         print(f"Error getting keyword details: {str(e)}")
-        return {}
 
-def run_analysis_crew(institution_name, domain_url):
-    """Run the analysis crew"""
+
+def run_seo_crew(institution_name, domain_url):
+    """Run the SEO crew"""
     try:
-        crew = AnalysisCrew()
-        crew.setup({'institution_name': institution_name, 'domain_url': domain_url})
-        result = crew.crew().kickoff()
-        return result
-    except Exception as e:
-        print(f"Error running analysis crew: {str(e)}")
-        raise
-
-def run_seo_crew(institution_name, domain_url, selected_keywords):
-    """Run the SEO crew with selected keywords"""
-    try:
-        keyword_details = get_keyword_details(selected_keywords)
-
         crew = SeoCrew()
         crew.setup({
             'institution_name': institution_name,
-            'domain_url': domain_url,
-            'keyword_details': keyword_details
+            'domain_url': domain_url
         })
-        result = crew.crew().kickoff()
-        return result
+        crew.crew().kickoff()
+
+        crew_dir = Path('outputs/crew')
+        markdown_content = {}
+
+        ad_path = crew_dir / '2_ad_copies.md'
+        if ad_path.exists():
+            with open(ad_path, 'r', encoding='utf-8') as f:
+                markdown_content['ad'] = f.read()
+
+        outlines_path = crew_dir / '3_blog_post_outlines.md'
+        if outlines_path.exists():
+            with open(outlines_path, 'r', encoding='utf-8') as f:
+                outlines_content = f.read()
+                # # Ensure proper formatting
+                # if not outlines_content.startswith('# Blog Post Outline'):
+                #     outlines_content = outlines_content.replace('# Blog Outline', '# Blog Post Outline')
+                markdown_content['outlines'] = outlines_content
+
+        return {
+            'status': 'success',
+            'message': 'Crew execution completed successfully',
+            'markdown': markdown_content
+        }
     except Exception as e:
         print(f"Error running SEO crew: {str(e)}")
         raise
+
 
 if __name__ == "__main__":
     # Test the workflow
@@ -136,7 +185,11 @@ if __name__ == "__main__":
 
     print("\nSelected keywords:", selected_keywords)
 
-    # Step 5: Run SEO crew with selected keywords
+    # Step 5: Save keyword details
+    print("\nSaving keyword details...")
+    save_keyword_details(selected_keywords)
+
+    # Step 6: Run SEO crew with selected keywords
     print("\nRunning SEO crew for selected keywords...")
-    seo_result = run_seo_crew(institution_name, domain_url, selected_keywords)
+    seo_result = run_seo_crew(institution_name, domain_url)
     print("SEO crew complete!")

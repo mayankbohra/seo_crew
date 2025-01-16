@@ -4,12 +4,18 @@ from crewai_tools import FileReadTool, SerperDevTool, WebsiteSearchTool
 from dotenv import load_dotenv
 from pathlib import Path
 import os
-import json
 
 load_dotenv()
 
+serper_api_key = os.getenv("SERPER_API_KEY")
+
+openai = LLM(
+    model="gpt-4o",
+    api_key=os.getenv("OPENAI_API_KEY")
+)
+
 anthropic = LLM(
-    model="claude-3-5-sonnet-20240620",
+    model="claude-3-sonnet-20240229",
     api_key=os.getenv("ANTHROPIC_API_KEY")
 )
 
@@ -34,11 +40,6 @@ class SeoCrew():
     def setup(self, inputs):
         """Initialize data before running tasks"""
         self.inputs = inputs
-        self.keyword_details = inputs.get('keyword_details', {})
-
-        # Save selected keyword details for agents
-        with open(self.output_dir / 'data' / 'selected_keywords.json', 'w', encoding='utf-8') as f:
-            json.dump(self.keyword_details, f, indent=2, ensure_ascii=False)
 
     @agent
     def ad_copy_specialist_agent(self) -> Agent:
@@ -48,15 +49,14 @@ class SeoCrew():
                 FileReadTool(
                     name="Read selected keywords data",
                     description="Read the selected_keywords.json file",
-                    file_path=self.output_dir / 'data' / 'selected_keywords.json',
+                    file_path=self.output_dir / 'keyword_details.json',
                     encoding='utf-8',
                     errors='ignore'
                 ),
-                SerperDevTool(),
-                WebsiteSearchTool()
+                SerperDevTool(api_key=serper_api_key)
             ],
             llm=anthropic,
-            verbose=True
+            verbose=False
         )
 
     @agent
@@ -67,15 +67,21 @@ class SeoCrew():
                 FileReadTool(
                     name="Read selected keywords data",
                     description="Read the selected_keywords.json file",
-                    file_path=self.output_dir / 'data' / 'selected_keywords.json',
+                    file_path=self.output_dir / 'crew' / '2_ad_copies.md',
                     encoding='utf-8',
                     errors='ignore'
                 ),
-                SerperDevTool(),
-                WebsiteSearchTool()
+                FileReadTool(
+                    name="Read keyword details data",
+                    description="Read the keyword_details.json file",
+                    file_path=self.output_dir / 'keyword_details.json',
+                    encoding='utf-8',
+                    errors='ignore'
+                ),
+                SerperDevTool(api_key=serper_api_key)
             ],
             llm=anthropic,
-            verbose=True
+            verbose=False
         )
 
     @task

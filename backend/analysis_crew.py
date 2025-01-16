@@ -22,7 +22,14 @@ class AnalysisCrew():
         self.output_dir.mkdir(exist_ok=True)
         (self.output_dir / 'crew').mkdir(exist_ok=True)
 
+        self.inputs = {}
+
         super().__init__()
+
+    @before_kickoff
+    def setup(self, inputs):
+        """Initialize data before running tasks"""
+        self.inputs = inputs
 
     @agent
     def data_analyst_agent(self) -> Agent:

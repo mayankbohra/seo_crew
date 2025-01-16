@@ -1,39 +1,25 @@
 export const progressSteps = [
     {
-        title: "Extracting user data...",
-        description: "Gathering information about your institution",
-        icon: "📊",
-        duration: 15000
+        id: 1,
+        name: 'Analysis',
+        description: 'Analyzing competitor keywords and rankings'
     },
     {
-        title: "Finding competitors...",
-        description: "Identifying top competitors in your space",
-        icon: "🔍",
-        duration: 15000
+        id: 2,
+        name: 'Keyword Selection',
+        description: 'Select target keywords for content generation'
     },
     {
-        title: "Analyzing competitor keywords...",
-        description: "Discovering high-value keyword opportunities",
-        icon: "📈",
-        duration: 30000
-    },
-    {
-        title: "Generating blog outlines...",
-        description: "Creating strategic content plans",
-        icon: "✍️",
-        duration: 35000
+        id: 3,
+        name: 'Content Generation',
+        description: 'Generating ad copies and blog outlines'
     }
 ];
 
-// Calculate accumulated timings for each step
-export const stepTimings = progressSteps.reduce((acc, step, index) => {
-    const previousDuration = index === 0 ? 0 : acc[index - 1].time;
-    acc[index] = {
-        step: index,
-        time: previousDuration + step.duration // Remove the 500ms gap
-    };
-    return acc;
-}, []);
+export const stepTimings = {
+    1: 120, // Analysis - 2 minutes
+    2: 30,  // Keyword Selection - 30 seconds
+    3: 180  // Content Generation - 3 minutes
+};
 
-// Total duration of all steps
-export const totalDuration = stepTimings[stepTimings.length - 1].time;
+export const totalDuration = Object.values(stepTimings).reduce((a, b) => a + b, 0);

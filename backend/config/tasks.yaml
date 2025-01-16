@@ -5,12 +5,12 @@ analyze_keyword_rankings_data:
     1. First analyze competitor rankings data:
        - Use the FileReadTool to read competitor_rankings.json
        - For each competitor domain, examine:
-         - Keyword rankings and positions
-         - Search volumes
-         - Keyword difficulty scores
-         - Top ranking URLs (hyperlink each url on word 'Link')
-       - Create detailed tables showing competitor keyword metrics
-       - Identify patterns and insights across competitor domains
+         - ALL keyword rankings and positions
+         - ALL search volumes
+         - ALL keyword difficulty scores
+         - ALL top ranking URLs (hyperlink each url on word 'Link')
+       - Create detailed tables showing ALL competitor keyword metrics
+       - Identify patterns and insights across ALL competitor domains
 
     2. Then analyze user rankings data:
        - Use the FileReadTool to read user_rankings.json
@@ -19,12 +19,12 @@ analyze_keyword_rankings_data:
          - Search volumes
          - Keyword difficulty scores
          - Top ranking URLs
-       - Compare performance against competitor benchmarks
-       - Identify gaps and opportunities
+       - Compare performance against ALL competitor benchmarks
+       - Identify ALL gaps and opportunities
 
     3. Provide strategic recommendations:
-       - Compare user vs competitor keyword targeting
-       - Highlight areas where user rankings lag behind competitors
+       - Compare user vs ALL competitor keyword targeting
+       - Highlight areas where user rankings lag behind ALL competitors
        - Suggest specific keywords to focus on improving
        - Recommend content and optimization strategies
        - Set realistic ranking improvement targets
@@ -34,11 +34,12 @@ analyze_keyword_rankings_data:
 
   expected_output: >
     ALWAYS provide a detailed markdown report containing:
-    1. Different data tables for all the competitors showing ALL the keyword metrics and patterns
-    2. Data tables showing user keyword performance
-    3. Comparative analysis between user and ALL the competitors rankings
-    4. Strategic recommendations backed by specific data points
-    5. All analysis based strictly on data from competitor_rankings.json and user_rankings.json
+    1. Make sure to give all the required data tables
+    2. Data tables for ALL the competitors showing ALL the keyword metrics and patterns
+    3. Data tables showing user keyword performance
+    4. Comparative analysis between user and ALL the competitors rankings
+    5. Strategic recommendations backed by specific data points
+    6. ALL analysis based strictly on data from competitor_rankings.json and user_rankings.json
 
 
 generate_ad_copies:
@@ -51,11 +52,11 @@ generate_ad_copies:
     awareness of Jaipuria and create positive perceptions in the mind of the potential student seeking admission
     in Jaipuria Institute of Management.
 
-    1. First, analyze the keyword data from competitor_rankings.json to identify:
+    1. First, analyze the keyword data from keyword_details.json to identify:
        - High commercial intent keywords
        - Keywords with good search volume
        - Keywords relevant to student recruitment
-       Then use SerperDevTool and WebsiteSearchTool to:
+       Then use SerperDevTool to:
        - Research competitor ad strategies
        - Analyze competitor landing pages
        - Understand search intent
@@ -107,18 +108,15 @@ generate_ad_copies:
 
 generate_blog_post_outlines:
   description: >
-    1. First use the FileReadTool to read ad_copies.md file to get the ad copies for Google Ads and Meta Ads
-    2. Then use the FileReadTool to read competitor_rankings.json and analyze its content to find keywords where:
-       - Search volume is high
-       - Keyword difficulty is low
+    1. First use the FileReadTool to read 2_ad_copies.md file to get the ad copies for Google Ads and Meta Ads
+    2. Then use the FileReadTool to read keyword_details.json to know the keyword details
     3. Then, for each selected keyword and ad copy for that keyword:
        - Get its exact topRankedUrl from the rankings data
        - Use SerperDevTool to analyze top-ranking content
-       - Use WebsiteSearchTool to research competitor content structure
        - create a detailed blog outline for 'Jaipuria Institute of Management', that will outrank it
        - ensure content is factual, balanced and avoids controversial topics
        - focus only on Jaipuria Institute of Management's offerings and expertise
-    For ad copies and keyword data, use ONLY the data from the ad_copies.md and competitor_rankings.json files.
+    For ad copies and keyword data, use ONLY the data from the ad_copies.md and keyword_details.json files.
   expected_output: >
     A markdown document with ALL the 5 (1-5) blog post outlines tailored ONLY for 'Jaipuria Institute of Management'.
     DON'T promote, compare with, or mention any other institution's name.

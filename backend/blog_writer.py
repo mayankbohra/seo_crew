@@ -84,3 +84,7 @@ def generate_blog(blog_outline):
             'status': 'error',
             'message': str(e)
         }
+
+if __name__ == "__main__":
+    blog_outline = input("Enter the blog outline: ")
+    generate_blog(blog_outline)
