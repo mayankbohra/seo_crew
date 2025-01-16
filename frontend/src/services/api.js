@@ -1,14 +1,17 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { supabase } from '../lib/supabase';
 
+const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+};
+
 export const runAnalysis = async (data) => {
     try {
         const response = await fetch(`${API_URL}/run/analysis`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
+            headers: defaultHeaders,
+            credentials: 'include',
             body: JSON.stringify(data)
         });
 

@@ -24,14 +24,29 @@ ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS").split(",")
 app = Flask(__name__)
 CORS(app, resources={
     r"/*": {
-        "origins": ALLOWED_ORIGINS,
+        "origins": os.getenv("ALLOWED_ORIGINS", "").split(","),
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "expose_headers": ["Content-Type", "Authorization"],
+        "allow_headers": ["Content-Type", "Authorization", "Accept"],
         "supports_credentials": True,
-        "max_age": 600
+        "expose_headers": ["Content-Type", "Authorization"],
+        "max_age": 600  # Cache preflight requests for 10 minutes
     }
 })
+
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+    origin = request.headers.get('Origin')
+
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        response.headers.add('Access-Control-Expose-Headers', 'Content-Type,Authorization')
+
+    return response
 
 def create_user_directory(userId):
     """Create user-specific directories"""
