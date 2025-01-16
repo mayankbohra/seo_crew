@@ -4,6 +4,7 @@ from crewai_tools import FileReadTool, SerperDevTool, WebsiteSearchTool
 from dotenv import load_dotenv
 from pathlib import Path
 import os
+import shutil
 
 load_dotenv()
 
@@ -26,10 +27,9 @@ class SeoCrew():
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
-    def __init__(self):
-        self.output_dir = Path('outputs')
-        self.output_dir.mkdir(exist_ok=True)
-        (self.output_dir / 'crew').mkdir(exist_ok=True)
+    def __init__(self, user_id):
+        # Create user-specific output directory
+        self.user_id = user_id
 
         self.inputs = {}
         self.keyword_details = {}
@@ -49,7 +49,7 @@ class SeoCrew():
                 FileReadTool(
                     name="Read selected keywords data",
                     description="Read the selected_keywords.json file",
-                    file_path=self.output_dir / 'keyword_details.json',
+                    file_path=Path('outputs') / self.user_id / 'data' / 'selected_keywords_details.json',
                     encoding='utf-8',
                     errors='ignore'
                 ),
@@ -65,16 +65,16 @@ class SeoCrew():
             config=self.agents_config['blog_outline_strategist'],
             tools=[
                 FileReadTool(
-                    name="Read selected keywords data",
-                    description="Read the selected_keywords.json file",
-                    file_path=self.output_dir / 'crew' / '2_ad_copies.md',
+                    name="Read ad copies data",
+                    description="Read the ad copies from 2_ad_copies.md file",
+                    file_path=str(Path('outputs') / self.user_id / 'crew' / '2_ad_copies.md'),
                     encoding='utf-8',
                     errors='ignore'
                 ),
                 FileReadTool(
-                    name="Read keyword details data",
-                    description="Read the keyword_details.json file",
-                    file_path=self.output_dir / 'keyword_details.json',
+                    name="Read selected keywords data",
+                    description="Read the selected keywords details",
+                    file_path=str(Path('outputs') / self.user_id / 'data' / 'selected_keywords_details.json'),
                     encoding='utf-8',
                     errors='ignore'
                 ),
@@ -89,7 +89,7 @@ class SeoCrew():
         return Task(
             config=self.tasks_config['generate_ad_copies'],
             agent=self.ad_copy_specialist_agent(),
-            output_file=str(self.output_dir / 'crew' / '2_ad_copies.md')
+            output_file=str(Path('outputs') / self.user_id / 'crew' / '2_ad_copies.md')
         )
 
     @task
@@ -98,7 +98,7 @@ class SeoCrew():
             config=self.tasks_config['generate_blog_post_outlines'],
             agent=self.blog_outline_strategist_agent(),
             context=[self.generate_ad_copies_task()],
-            output_file=str(self.output_dir / 'crew' / '3_blog_post_outlines.md')
+            output_file=str(Path('outputs') / self.user_id / 'crew' / '3_blog_post_outlines.md')
         )
 
     @crew

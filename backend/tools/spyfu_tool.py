@@ -23,12 +23,9 @@ class SpyfuTool(BaseTool):
         "Set analysis_type to 'competitors' for competitor analysis or 'rankings' for newly ranking keywords."
     )
     args_schema: Type[BaseModel] = SpyfuToolInput
-    output_dir: Path = Field(default_factory=lambda: Path('outputs/data'))
 
     def __init__(self, **data):
         super().__init__(**data)
-        # Create outputs directory if it doesn't exist
-        self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def _run(self, domain: str, analysis_type: str) -> str:
         """Run the specified type of analysis"""

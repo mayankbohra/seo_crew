@@ -1,13 +1,13 @@
-from crew import SeoCrew
-from analysis_crew import AnalysisCrew
 from tools.spyfu_tool import SpyfuTool
-import warnings
+from analysis_crew import AnalysisCrew
+from seo_crew import SeoCrew
 from pathlib import Path
+import warnings
 import json
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
-def fetch_data_from_spyfu(domain_url, output_dir):
+def fetch_data_from_spyfu(domain_url: str, output_dir: Path):
     """Fetch and save data from SpyFu"""
     spy_tool = SpyfuTool()
 
@@ -41,45 +41,30 @@ def fetch_data_from_spyfu(domain_url, output_dir):
         json.dump(rankings_data, f, indent=2, ensure_ascii=False)
 
 
-def run_analysis_crew(institution_name, domain_url):
+def run_analysis_crew(user_id: str, institution_name: str, domain_url: str, output_dir: Path):
     """Run the analysis crew"""
     try:
-        # Create output directory
-        output_dir = Path('outputs')
-        output_dir.mkdir(exist_ok=True)
-        (output_dir / 'data').mkdir(exist_ok=True)
+        print(f"Running analysis for user: {user_id}")
 
         print("Fetching SpyFu data...")
         fetch_data_from_spyfu(domain_url, output_dir)
 
-        crew = AnalysisCrew()
+        crew = AnalysisCrew(user_id)
         crew.setup({
             'institution_name': institution_name,
             'domain_url': domain_url,
         })
         crew.crew().kickoff()
 
-        markdown_content = {}
-        analysis_path = output_dir / 'crew' / '1_analysis.md'
-        if analysis_path.exists():
-            with open(analysis_path, 'r', encoding='utf-8') as f:
-                markdown_content['analysis'] = f.read()
-
-        return {
-            'status': 'success',
-            'message': 'Crew execution completed successfully',
-            'markdown': markdown_content
-        }
-
     except Exception as e:
         print(f"Error running analysis crew: {str(e)}")
         raise
 
 
-def get_available_keywords():
+def get_available_keywords(userId: str):
     """Get list of all unique keywords from competitor rankings"""
     try:
-        with open('outputs/data/competitor_rankings.json', 'r', encoding='utf-8') as f:
+        with open(f'outputs/{userId}/data/competitor_rankings.json', 'r', encoding='utf-8') as f:
             rankings_data = json.load(f)
 
         keywords = set()
@@ -93,10 +78,10 @@ def get_available_keywords():
         return []
 
 
-def save_keyword_details(selected_keywords):
+def save_keyword_details(userId: str, selected_keywords: list[str]):
     """Get full details for selected keywords"""
     try:
-        with open('outputs/data/competitor_rankings.json', 'r', encoding='utf-8') as f:
+        with open(f'outputs/{userId}/data/competitor_rankings.json', 'r', encoding='utf-8') as f:
             rankings_data = json.load(f)
 
         keyword_details = {}
@@ -107,45 +92,23 @@ def save_keyword_details(selected_keywords):
                         keyword_details[result['keyword']] = result
 
         # save keyword details to json file
-        with open('outputs/keyword_details.json', 'w', encoding='utf-8') as f:
+        with open(f'outputs/{userId}/data/selected_keywords_details.json', 'w', encoding='utf-8') as f:
             json.dump(keyword_details, f, indent=2, ensure_ascii=False)
 
     except Exception as e:
         print(f"Error getting keyword details: {str(e)}")
 
 
-def run_seo_crew(institution_name, domain_url):
+def run_seo_crew(userId: str, institution_name: str, domain_url: str):
     """Run the SEO crew"""
     try:
-        crew = SeoCrew()
+        print(f"Running SEO crew for user: {userId}")
+        crew = SeoCrew(userId)
         crew.setup({
             'institution_name': institution_name,
             'domain_url': domain_url
         })
         crew.crew().kickoff()
-
-        crew_dir = Path('outputs/crew')
-        markdown_content = {}
-
-        ad_path = crew_dir / '2_ad_copies.md'
-        if ad_path.exists():
-            with open(ad_path, 'r', encoding='utf-8') as f:
-                markdown_content['ad'] = f.read()
-
-        outlines_path = crew_dir / '3_blog_post_outlines.md'
-        if outlines_path.exists():
-            with open(outlines_path, 'r', encoding='utf-8') as f:
-                outlines_content = f.read()
-                # # Ensure proper formatting
-                # if not outlines_content.startswith('# Blog Post Outline'):
-                #     outlines_content = outlines_content.replace('# Blog Outline', '# Blog Post Outline')
-                markdown_content['outlines'] = outlines_content
-
-        return {
-            'status': 'success',
-            'message': 'Crew execution completed successfully',
-            'markdown': markdown_content
-        }
     except Exception as e:
         print(f"Error running SEO crew: {str(e)}")
         raise

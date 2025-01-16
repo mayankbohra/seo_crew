@@ -3,39 +3,34 @@ import { supabase } from '../lib/supabase';
 
 export const runAnalysis = async (data) => {
     try {
-        const { data: { session } } = await supabase.auth.getSession();
-
         const response = await fetch(`${API_URL}/run/analysis`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${session?.access_token}`
             },
-            credentials: 'include',
             body: JSON.stringify(data)
         });
 
         const result = await response.json();
 
-        if (!response.ok) {
+        if (result.status === 'success') {
+            // Store user ID for subsequent requests
+            localStorage.setItem('userId', result.userId);
+            return result;
+        } else {
             throw new Error(result.message || 'Analysis failed');
         }
-
-        if (result.status === 'error') {
-            throw new Error(result.message);
-        }
-
-        return result;
     } catch (error) {
         console.error('API Error:', error);
-        throw new Error(error.message || 'Failed to run analysis');
+        throw error;
     }
 };
 
 export const getKeywords = async () => {
     try {
-        const response = await fetch(`${API_URL}/keywords`, {
+        const userId = localStorage.getItem('userId');
+        const response = await fetch(`${API_URL}/keywords/${userId}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -56,14 +51,17 @@ export const getKeywords = async () => {
 
 export const saveKeywords = async (keywords) => {
     try {
-        const response = await fetch(`${API_URL}/keywords/save`, {
+        const userId = localStorage.getItem('userId');
+        const response = await fetch(`${API_URL}/keywords/save/${userId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
-            credentials: 'include',
-            body: JSON.stringify({ keywords })
+            body: JSON.stringify({
+                keywords,
+                userId
+            })
         });
 
         if (!response.ok) {
@@ -79,14 +77,17 @@ export const saveKeywords = async (keywords) => {
 
 export const runSeo = async (data) => {
     try {
-        const response = await fetch(`${API_URL}/run/seo`, {
+        const userId = localStorage.getItem('userId');
+        const response = await fetch(`${API_URL}/run/seo/${userId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
-            credentials: 'include',
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                ...data,
+                userId
+            })
         });
 
         if (!response.ok) {
@@ -108,14 +109,16 @@ export const runSeo = async (data) => {
 
 export const generateBlog = async (blogOutline) => {
     try {
-        const response = await fetch(`${API_URL}/generate-blog`, {
+        const userId = localStorage.getItem('userId');
+        const response = await fetch(`${API_URL}/generate-blog/${userId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
-            credentials: 'include',
-            body: JSON.stringify({ blogOutline })
+            body: JSON.stringify({
+                outline: blogOutline.outline
+            })
         });
 
         if (!response.ok) {
@@ -126,7 +129,7 @@ export const generateBlog = async (blogOutline) => {
 
         if (result.status === 'success') {
             // Then fetch the markdown content
-            const markdownResponse = await fetch(`${API_URL}/markdown/blog_post.md`, {
+            const markdownResponse = await fetch(`${API_URL}/markdown/blog_post.md/${userId}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'text/markdown',

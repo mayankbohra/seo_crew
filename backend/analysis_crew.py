@@ -16,10 +16,11 @@ class AnalysisCrew():
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
-    def __init__(self):
-        # Create outputs directory structure
-        self.output_dir = Path('outputs')
-        self.output_dir.mkdir(exist_ok=True)
+    def __init__(self, user_id: str):
+        # Use user-specific output directory
+        self.user_id = user_id
+        self.output_dir = Path('outputs') / str(user_id)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         (self.output_dir / 'crew').mkdir(exist_ok=True)
 
         self.inputs = {}
@@ -37,24 +38,23 @@ class AnalysisCrew():
             config=self.agents_config['data_analyst'],
             tools=[
                 FileReadTool(
-					name="Read competitor rankings data",
-					description="Read the competitor_rankings.json file",
-					file_path=self.output_dir / 'data' / 'competitor_rankings.json',
-					encoding='utf-8',
-					errors='ignore'
-				),
-				FileReadTool(
-					name="Read user rankings data",
-					description="Read the user_rankings.json file",
-					file_path=self.output_dir / 'data' / 'user_rankings.json',
-					encoding='utf-8',
-					errors='ignore'
-				)
-			],
-			llm=openai,
-			verbose=False
-	)
-
+                    name="Read competitor rankings data",
+                    description="Read the competitor_rankings.json file",
+                    file_path=self.output_dir / 'data' / 'competitor_rankings.json',
+                    encoding='utf-8',
+                    errors='ignore'
+                ),
+                FileReadTool(
+                    name="Read user rankings data",
+                    description="Read the user_rankings.json file",
+                    file_path=self.output_dir / 'data' / 'user_rankings.json',
+                    encoding='utf-8',
+                    errors='ignore'
+                )
+            ],
+            llm=openai,
+            verbose=False
+        )
 
     @task
     def analyze_keyword_rankings_data_task(self) -> Task:
@@ -63,7 +63,6 @@ class AnalysisCrew():
             agent=self.data_analyst_agent(),
             output_file=str(self.output_dir / 'crew' / '1_analysis.md')
         )
-
 
     @crew
     def crew(self) -> Crew:

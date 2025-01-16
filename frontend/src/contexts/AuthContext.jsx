@@ -9,56 +9,28 @@ export const AuthProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Clear any existing session data on mount
-        localStorage.removeItem('supabase.auth.token');
+        // Check active sessions and sets the user
+        const session = supabase.auth.getSession();
 
-        const initializeAuth = async () => {
-            try {
-                // Force check session
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // Setup listener for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+            setLoading(false);
+        });
 
-                if (sessionError) {
-                    throw sessionError;
-                }
-
-                // Only set user if we have a valid session
-                if (session?.user && session?.access_token) {
-                    setUser(session.user);
-                } else {
-                    setUser(null);
-                }
-
-                // Listen for auth changes
-                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-                    if (event === 'SIGNED_IN' && session?.user) {
-                        setUser(session.user);
-                    } else if (event === 'SIGNED_OUT') {
-                        setUser(null);
-                    }
-                });
-
-                return () => {
-                    subscription?.unsubscribe();
-                };
-            } catch (error) {
-                console.error('Auth error:', error);
-                setError(error.message);
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
+        return () => {
+            subscription.unsubscribe();
         };
-
-        initializeAuth();
     }, []);
 
-    // Provide sign out functionality
     const signOut = async () => {
         try {
-            await supabase.auth.signOut();
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
             setUser(null);
         } catch (error) {
-            console.error('Sign out error:', error);
+            setError(error.message);
+            throw error;
         }
     };
 
@@ -66,8 +38,8 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         error,
-        isAuthenticated: !!user,
-        signOut
+        signOut,
+        isAuthenticated: !!user
     };
 
     return (

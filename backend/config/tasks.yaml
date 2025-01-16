@@ -52,7 +52,7 @@ generate_ad_copies:
     awareness of Jaipuria and create positive perceptions in the mind of the potential student seeking admission
     in Jaipuria Institute of Management.
 
-    1. First, analyze the keyword data from keyword_details.json to identify:
+    1. First, analyze the keyword data from selected_keywords_details.json to identify:
        - High commercial intent keywords
        - Keywords with good search volume
        - Keywords relevant to student recruitment
@@ -109,14 +109,14 @@ generate_ad_copies:
 generate_blog_post_outlines:
   description: >
     1. First use the FileReadTool to read 2_ad_copies.md file to get the ad copies for Google Ads and Meta Ads
-    2. Then use the FileReadTool to read keyword_details.json to know the keyword details
+    2. Then use the FileReadTool to read selected_keywords_details.json to get the details of the selected keywords
     3. Then, for each selected keyword and ad copy for that keyword:
        - Get its exact topRankedUrl from the rankings data
-       - Use SerperDevTool to analyze top-ranking content
-       - create a detailed blog outline for 'Jaipuria Institute of Management', that will outrank it
+       - Research the ranking URL using SerperDevTool
+       - Create a detailed blog outline designed to outperform it
        - ensure content is factual, balanced and avoids controversial topics
        - focus only on Jaipuria Institute of Management's offerings and expertise
-    For ad copies and keyword data, use ONLY the data from the ad_copies.md and keyword_details.json files.
+    For ad copies and keyword data, use ONLY the data from the 2_ad_copies.md and selected_keywords_details.json files.
   expected_output: >
     A markdown document with ALL the 5 (1-5) blog post outlines tailored ONLY for 'Jaipuria Institute of Management'.
     DON'T promote, compare with, or mention any other institution's name.

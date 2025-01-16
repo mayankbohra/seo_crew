@@ -107,7 +107,7 @@ export default function DownloadPage() {
 
     const handleDownload = (filename) => {
         if (filename) {
-            window.open(`${import.meta.env.VITE_API_URL}/download/${filename}`, '_blank');
+            window.open(`${import.meta.env.VITE_API_URL}/download/${localStorage.getItem('userId')}/${filename}`, '_blank');
         }
     };
 
@@ -117,14 +117,17 @@ export default function DownloadPage() {
             return;
         }
 
-        const blogGenUrl = `/generate-blog?outline=${encodeURIComponent(outlineContent)}`;
-        // Open in new tab with proper parameters
-        window.open(blogGenUrl, '_blank');
+        const userId = localStorage.getItem('userId');
+        const blogGenUrl = `/blog?outline=${encodeURIComponent(outlineContent)}&userId=${userId}`;
 
         // Store the outline in localStorage for access in the new tab
         localStorage.setItem('blogOutline', JSON.stringify({
-            content: outlineContent
+            content: outlineContent,
+            userId: userId
         }));
+
+        // Open in new tab with proper parameters
+        window.open(blogGenUrl, '_blank');
     };
 
     const TabButton = ({ id, label, count, onClick, isActive }) => (

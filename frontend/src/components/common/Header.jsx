@@ -3,8 +3,20 @@ import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 
 export default function Header() {
-    const { user, logout } = useAuth();
+    const { user, signOut } = useAuth();
     const location = useLocation();
+
+    const handleLogout = async () => {
+        try {
+            await signOut();
+            // Clear any user-specific data from localStorage
+            localStorage.removeItem('userId');
+            localStorage.removeItem('blogOutline');
+            // Any other user-specific data that needs to be cleared
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
+    };
 
     return (
         <motion.header
@@ -52,7 +64,7 @@ export default function Header() {
                                     New Analysis
                                 </Link>
                                 <button
-                                    onClick={logout}
+                                    onClick={handleLogout}
                                     className="ml-4 px-4 py-2 text-sm font-medium text-white
                                              bg-gradient-to-r from-indigo-600 to-purple-600
                                              rounded-md hover:from-indigo-700 hover:to-purple-700
@@ -71,7 +83,7 @@ export default function Header() {
                     <div className="sm:hidden">
                         {user && (
                             <button
-                                onClick={logout}
+                                onClick={handleLogout}
                                 className="px-4 py-2 text-sm font-medium text-white
                                          bg-gradient-to-r from-indigo-600 to-purple-600
                                          rounded-md hover:from-indigo-700 hover:to-purple-700"
