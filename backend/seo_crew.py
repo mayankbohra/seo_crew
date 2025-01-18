@@ -16,8 +16,13 @@ openai = LLM(
 )
 
 anthropic = LLM(
-    model="claude-3-sonnet-20240229",
+    model="claude-3-5-sonnet-20240620",
     api_key=os.getenv("ANTHROPIC_API_KEY")
+)
+
+gemini = LLM(
+    model="gemini/gemini-2.0-flash-exp",
+    api_key=os.getenv("GEMINI_API_KEY")
 )
 
 @CrewBase
@@ -55,7 +60,7 @@ class SeoCrew():
                 ),
                 SerperDevTool(api_key=serper_api_key)
             ],
-            llm=anthropic,
+            llm=gemini,
             verbose=False
         )
 
@@ -77,10 +82,9 @@ class SeoCrew():
                     file_path=str(Path('outputs') / self.user_id / 'data' / 'selected_keywords_details.json'),
                     encoding='utf-8',
                     errors='ignore'
-                ),
-                SerperDevTool(api_key=serper_api_key)
+                )
             ],
-            llm=anthropic,
+            llm=gemini,
             verbose=False
         )
 

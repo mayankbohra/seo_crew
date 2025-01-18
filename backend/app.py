@@ -146,8 +146,16 @@ def run_analysis():
 
             print("Analysis crew run complete")
 
-            markdown_content = {}
+            # Clean the analysis markdown file
             analysis_path = output_dir / 'crew' / '1_analysis.md'
+            if analysis_path.exists():
+                with open(analysis_path, 'r', encoding='utf-8') as f:
+                    analysis_content = f.readlines()
+                analysis_content = [line for line in analysis_content if line.strip() != '```markdown' and line.strip() != '```']
+                with open(analysis_path, 'w', encoding='utf-8') as f:
+                    f.writelines(analysis_content)
+
+            markdown_content = {}
             if analysis_path.exists():
                 with open(analysis_path, 'r', encoding='utf-8') as f:
                     markdown_content['analysis'] = f.read()
@@ -252,8 +260,26 @@ def run_seo(userId):
             result.join()
 
             crew_dir = Path('outputs') / userId / 'crew'
-            markdown_content = {}
 
+            # Clean the ad copies markdown file
+            ad_copies_path = crew_dir / '2_ad_copies.md'
+            if ad_copies_path.exists():
+                with open(ad_copies_path, 'r', encoding='utf-8') as f:
+                    ad_content = f.readlines()
+                ad_content = [line for line in ad_content if line.strip() != '```markdown' and line.strip() != '```']
+                with open(ad_copies_path, 'w', encoding='utf-8') as f:
+                    f.writelines(ad_content)
+
+            # Clean the blog post outlines markdown file
+            outlines_path = crew_dir / '3_blog_post_outlines.md'
+            if outlines_path.exists():
+                with open(outlines_path, 'r', encoding='utf-8') as f:
+                    outlines_content = f.readlines()
+                outlines_content = [line for line in outlines_content if line.strip() != '```markdown' and line.strip() != '```']
+                with open(outlines_path, 'w', encoding='utf-8') as f:
+                    f.writelines(outlines_content)
+
+            markdown_content = {}
             ad_path = crew_dir / '2_ad_copies.md'
             if ad_path.exists():
                 with open(ad_path, 'r', encoding='utf-8') as f:

@@ -1,5 +1,6 @@
 from tools.spyfu_tool import SpyfuTool
 from analysis_crew import AnalysisCrew
+from blog_writer import generate_blog
 from seo_crew import SeoCrew
 from pathlib import Path
 import warnings
@@ -118,41 +119,47 @@ if __name__ == "__main__":
     # Test the workflow
     institution_name = "Jaipuria Institute of Management"
     domain_url = "jaipuria.ac.in"
-    output_dir = Path('outputs')
-    output_dir.mkdir(exist_ok=True)
-    (output_dir / 'data').mkdir(exist_ok=True)
+    # output_dir = Path('outputs')
+    # output_dir.mkdir(exist_ok=True)
+    # (output_dir / 'data').mkdir(exist_ok=True)
 
-    # Step 1: Fetch SpyFu data
-    print("Fetching SpyFu data...")
-    fetch_data_from_spyfu(domain_url, output_dir)
+    # # Step 1: Fetch SpyFu data
+    # print("Fetching SpyFu data...")
+    # fetch_data_from_spyfu(domain_url, output_dir)
 
-    # Step 2: Run analysis crew
-    print("\nRunning analysis crew...")
-    analysis_result = run_analysis_crew(institution_name, domain_url)
-    print("Analysis complete!")
+    # # Step 2: Run analysis crew
+    # print("\nRunning analysis crew...")
+    # analysis_result = run_analysis_crew(institution_name, domain_url)
+    # print("Analysis complete!")
 
-    # Step 3: Show available keywords
-    print("\nAvailable keywords:")
-    keywords = get_available_keywords()
-    for i, keyword in enumerate(keywords, 1):
-        print(f"{i}. {keyword}")
+    # # Step 3: Show available keywords
+    # print("\nAvailable keywords:")
+    # keywords = get_available_keywords()
+    # for i, keyword in enumerate(keywords, 1):
+    #     print(f"{i}. {keyword}")
 
-    # Step 4: Get user input for keyword selection
-    print("\nEnter the numbers of keywords you want to target (comma-separated):")
-    selections = input("> ").strip().split(',')
-    selected_keywords = [keywords[int(i.strip()) - 1] for i in selections if i.strip().isdigit() and 0 < int(i) <= len(keywords)]
+    # # Step 4: Get user input for keyword selection
+    # print("\nEnter the numbers of keywords you want to target (comma-separated):")
+    # selections = input("> ").strip().split(',')
+    # selected_keywords = [keywords[int(i.strip()) - 1] for i in selections if i.strip().isdigit() and 0 < int(i) <= len(keywords)]
 
-    if not selected_keywords:
-        print("No valid keywords selected!")
-        exit(1)
+    # if not selected_keywords:
+    #     print("No valid keywords selected!")
+    #     exit(1)
 
-    print("\nSelected keywords:", selected_keywords)
+    # print("\nSelected keywords:", selected_keywords)
 
-    # Step 5: Save keyword details
-    print("\nSaving keyword details...")
-    save_keyword_details(selected_keywords)
+    # # Step 5: Save keyword details
+    # print("\nSaving keyword details...")
+    # save_keyword_details(selected_keywords)
 
     # Step 6: Run SEO crew with selected keywords
     print("\nRunning SEO crew for selected keywords...")
-    seo_result = run_seo_crew(institution_name, domain_url)
+    seo_result = run_seo_crew("ef2c1a46-2511-482f-8668-935b1f219eeb", institution_name, domain_url)
     print("SEO crew complete!")
+
+    # Step 7: Run blog writer crew
+    print("\nRunning blog writer")
+    blog_outline = input("Enter the blog outline: ")
+    generate_blog(blog_outline, "ef2c1a46-2511-482f-8668-935b1f219eeb")
+    print("Blog writer crew complete!")

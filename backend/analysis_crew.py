@@ -9,6 +9,11 @@ openai = LLM(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
+gemini = LLM(
+    model="gemini/gemini-2.0-flash-exp",
+    api_key=os.getenv("GEMINI_API_KEY")
+)
+
 @CrewBase
 class AnalysisCrew():
     """Analysis Crew"""
@@ -52,7 +57,7 @@ class AnalysisCrew():
                     errors='ignore'
                 )
             ],
-            llm=openai,
+            llm=gemini,
             verbose=False
         )
 
