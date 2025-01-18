@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_file, make_response
 from spire.doc import Document, FileFormat
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from dotenv import load_dotenv
 from threading import Thread
 from pathlib import Path
@@ -25,7 +25,7 @@ app = Flask(__name__)
 CORS(app, resources={
     r"/*": {
         "origins": os.getenv("ALLOWED_ORIGINS", "").split(","),
-        "methods": ["GET", "POST", "OPTIONS"],
+        "methods": ["GET", "POST", "OPTIONS", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization", "Accept"],
         "supports_credentials": True,
         "expose_headers": ["Content-Type", "Authorization"],
@@ -42,7 +42,7 @@ def after_request(response):
     if origin in allowed_origins:
         response.headers.add('Access-Control-Allow-Origin', origin)
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,DELETE')
         response.headers.add('Access-Control-Allow-Credentials', 'true')
         response.headers.add('Access-Control-Expose-Headers', 'Content-Type,Authorization')
 
@@ -402,13 +402,33 @@ def serve_markdown(filename, userId):
             'message': str(e)
         }), 500
 
-# # Register cleanup on shutdown
-# @atexit.register
-# def cleanup(userId):
-#     """Clean up all user directories on shutdown"""
-#     outputs_dir = Path('outputs') / userId
-#     if outputs_dir.exists():
-#         shutil.rmtree(outputs_dir)
+@app.route('/cleanup/<user_id>', methods=['DELETE'])
+def cleanup_user_data(user_id):
+    try:
+        print(f"Cleaning up user data for {user_id}")
+        user_dir = Path('outputs') / str(user_id)
+        if user_dir.exists():
+            try:
+                shutil.rmtree(user_dir)
+                print(f"Successfully deleted directory: {user_dir}")
+            except PermissionError as pe:
+                print(f"Permission error while deleting: {pe}")
+                os.system(f'rm -rf "{user_dir}"')
+            except Exception as e:
+                print(f"Error while deleting directory: {e}")
+                raise
+
+        print(f"User data cleaned up successfully for {user_id}")
+        return jsonify({
+            'status': 'success',
+            'message': 'User data cleaned up successfully'
+        })
+    except Exception as e:
+        print(f"Error cleaning up user data: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import KeywordSelection from '../keywords/KeywordSelection';
-import { getKeywords, saveKeywords, runSeo, generateBlog } from '../../services/api';
+import { getKeywords, saveKeywords, runSeo, generateBlog, cleanupUserData } from '../../services/api';
 
 export default function DownloadPage() {
     const location = useLocation();
@@ -130,6 +130,20 @@ export default function DownloadPage() {
         window.open(blogGenUrl, '_blank');
     };
 
+    const handleNavigation = async (path) => {
+        try {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                await cleanupUserData(userId);
+                localStorage.removeItem('userId'); // Clear userId after cleanup
+            }
+            navigate(path);
+        } catch (error) {
+            console.error('Navigation cleanup error:', error);
+            navigate(path); // Navigate anyway if cleanup fails
+        }
+    };
+
     const TabButton = ({ id, label, count, onClick, isActive }) => (
         <button
             onClick={onClick}
@@ -168,22 +182,10 @@ export default function DownloadPage() {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={() => handleNavigation('/')}
                         className="flex items-center px-4 py-2 text-gray-600 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors"
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 mr-2"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                        >
-                            <path
-                                fillRule="evenodd"
-                                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                                clipRule="evenodd"
-                            />
-                        </svg>
-                        Go Back Home
+                        <span>← Go Back Home</span>
                     </button>
                     <h1 className="text-4xl font-bold text-gray-900">
                         Generated Content
@@ -201,7 +203,7 @@ export default function DownloadPage() {
                     </div>
                 )}
 
-                <div className="sticky top-20 z-10 flex justify-center space-x-4 py-4 bg-gradient-to-br from-indigo-50/80 via-white/80 to-purple-50/80 backdrop-blur-sm rounded-lg shadow-md">
+                <div className="top-20 z-10 flex justify-center space-x-4 py-4 bg-gradient-to-br from-indigo-50/80 via-white/80 to-purple-50/80 backdrop-blur-sm rounded-lg shadow-md">
                     {analysisContent && (
                         <TabButton
                             id="analysis"

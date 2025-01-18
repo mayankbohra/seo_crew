@@ -65,11 +65,11 @@ export default function InstituteForm() {
 
                         {error && (
                             <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg"
                             >
-                                <p className="text-red-700">{error}</p>
+                                {error}
                             </motion.div>
                         )}
 
@@ -94,10 +94,12 @@ export default function InstituteForm() {
                                         type="text"
                                         value={institutionName}
                                         onChange={(e) => setInstitutionName(e.target.value)}
-                                        className="w-full pl-10 px-4 py-3 rounded-lg border-2 border-gray-200
+                                        disabled={loading}
+                                        className={`w-full pl-10 px-4 py-3 rounded-lg border-2 border-gray-200
                                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                                 transition-colors bg-gray-50 hover:bg-white"
-                                        placeholder="Enter institution name"
+                                                 transition-colors bg-gray-50 hover:bg-white
+                                                 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        placeholder="Jaipuria Institute of Management"
                                         required
                                     />
                                 </div>
@@ -123,10 +125,12 @@ export default function InstituteForm() {
                                         type="text"
                                         value={domainUrl}
                                         onChange={(e) => setDomainUrl(e.target.value)}
-                                        className="w-full pl-10 px-4 py-3 rounded-lg border-2 border-gray-200
+                                        disabled={loading}
+                                        className={`w-full pl-10 px-4 py-3 rounded-lg border-2 border-gray-200
                                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                                 transition-colors bg-gray-50 hover:bg-white"
-                                        placeholder="e.g., example.edu"
+                                                 transition-colors bg-gray-50 hover:bg-white
+                                                 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        placeholder="jaipuria.ec.in"
                                         required
                                     />
                                 </div>
@@ -141,14 +145,15 @@ export default function InstituteForm() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600
+                                    className={`w-full bg-gradient-to-r from-indigo-600 to-purple-600
                                              hover:from-indigo-700 hover:to-purple-700
                                              text-white py-3 px-4 rounded-lg
                                              focus:outline-none focus:ring-2 focus:ring-offset-2
                                              focus:ring-indigo-500 transition-all
                                              disabled:opacity-50 disabled:cursor-not-allowed
                                              shadow-lg hover:shadow-xl
-                                             transform hover:-translate-y-0.5"
+                                             transform hover:-translate-y-0.5
+                                             ${loading ? 'cursor-not-allowed' : ''}`}
                                 >
                                     {loading ? (
                                         <div className="flex items-center justify-center">

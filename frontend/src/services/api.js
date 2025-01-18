@@ -158,3 +158,26 @@ export const generateBlog = async (blogOutline) => {
         throw error;
     }
 };
+
+export const cleanupUserData = async (userId) => {
+    try {
+        const response = await fetch(`${API_URL}/cleanup/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to cleanup user data');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Cleanup error:', error);
+        throw error;
+    }
+};

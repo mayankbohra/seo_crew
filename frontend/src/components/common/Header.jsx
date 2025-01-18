@@ -43,26 +43,7 @@ export default function Header() {
                     <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
                         {user && (
                             <>
-                                <Link
-                                    to="/"
-                                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors
-                                        ${location.pathname === '/'
-                                            ? 'text-indigo-600 bg-indigo-50'
-                                            : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    Home
-                                </Link>
-                                <Link
-                                    to="/form"
-                                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors
-                                        ${location.pathname === '/form'
-                                            ? 'text-indigo-600 bg-indigo-50'
-                                            : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    New Analysis
-                                </Link>
+                                <span className="text-gray-800">Welcome, {user.email}</span>
                                 <button
                                     onClick={handleLogout}
                                     className="ml-4 px-4 py-2 text-sm font-medium text-white

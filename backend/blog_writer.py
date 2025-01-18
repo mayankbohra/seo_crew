@@ -4,7 +4,6 @@ import os
 from dotenv import load_dotenv
 from google import genai
 from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
-from prompt_toolkit import HTML
 
 load_dotenv()
 
