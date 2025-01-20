@@ -1,78 +1,80 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 
-export default function LoginPage() {
+export default function SignUpPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { user } = useAuth();
 
-    // Redirect if already authenticated
-    useEffect(() => {
-        if (user) {
-            navigate('/', { replace: true });
-        }
-    }, [user, navigate]);
-
-    const handleLogin = async (e) => {
+    const handleSignUp = async (e) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            // Check if email domain is allowed
+            const domain = email.split('@')[1];
+            if (domain !== import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN) {
+                throw new Error(`Only ${import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN} email addresses are allowed`);
+            }
+
+            const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/verify-otp`,
+                }
             });
 
             if (error) throw error;
 
-            toast.success('Login successful!', {
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: false
-            });
-
             if (data?.user) {
-                navigate('/', { replace: true });
+                // Store email temporarily for OTP verification
+                localStorage.setItem('verificationEmail', email);
+                toast.success('Email verification link sent!', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: false
+                });
+                setTimeout(() => {
+                    navigate('/verify-otp');
+                }, 2000);
             }
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Signup error:', error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center pb-20 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 className="max-w-md w-full"
             >
-                {/* Logo/Header */}
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-                    <p className="mt-2 text-gray-600">Sign in to access SEO Blog Writer</p>
+                    <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
+                    <p className="mt-2 text-gray-600">Sign up to get started with SEO Blog Writer</p>
                 </div>
 
-                {/* Login Form */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                     className="bg-white rounded-xl shadow-xl p-8 border border-gray-100"
                 >
-                    <form onSubmit={handleLogin} className="space-y-6">
+                    <form onSubmit={handleSignUp} className="space-y-6">
                         {error && (
                             <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
                                 {error}
@@ -123,27 +125,19 @@ export default function LoginPage() {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Signing in...
+                                        Creating Account...
                                     </>
                                 ) : (
-                                    'Sign In'
+                                    'Sign Up'
                                 )}
                             </button>
 
                             <button
                                 type="button"
-                                onClick={() => navigate('/forgot-password')}
+                                onClick={() => navigate('/login')}
                                 className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                             >
-                                Forgot Password?
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => navigate('/signup')}
-                                className="pt-2 text-indigo-600 hover:text-indigo-700 text-sm font-medium"
-                            >
-                                Don't have an account? Sign Up
+                                Already have an account? Sign in
                             </button>
                         </div>
                     </form>

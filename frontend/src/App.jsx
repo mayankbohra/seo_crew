@@ -10,10 +10,13 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
 import Header from './components/common/Header';
-import SetPassword from './components/auth/SetPassword';
 import ForgotPassword from './components/auth/ForgotPassword';
 import ResetPassword from './components/auth/ResetPassword';
 import BlogGeneration from './components/blog/BlogGeneration';
+import SignUpPage from './components/auth/SignUpPage';
+import VerifyOTP from './components/auth/VerifyOTP';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // PrivateRoute component
 function PrivateRoute({ children }) {
@@ -50,6 +53,11 @@ function App() {
                                         <InstituteForm />
                                     </PrivateRoute>
                                 } />
+                                <Route path="/signup" element={
+                                    <PublicRoute>
+                                        <SignUpPage />
+                                    </PublicRoute>
+                                } />
                                 <Route path="/login" element={
                                     <PublicRoute>
                                         <LoginPage />
@@ -70,7 +78,6 @@ function App() {
                                         <BlogGenerationForm />
                                     </PrivateRoute>
                                 } />
-                                <Route path="/set-password" element={<SetPassword />} />
                                 <Route path="/forgot-password" element={
                                     <PublicRoute>
                                         <ForgotPassword />
@@ -82,8 +89,14 @@ function App() {
                                     </PublicRoute>
                                 } />
                                 <Route path="/blog" element={<BlogGeneration />} />
+                                <Route path="/verify-otp" element={
+                                    <PublicRoute>
+                                        <VerifyOTP />
+                                    </PublicRoute>
+                                } />
                             </Routes>
                         </main>
+                        <ToastContainer />
                     </div>
                 </Router>
             </AuthProvider>
