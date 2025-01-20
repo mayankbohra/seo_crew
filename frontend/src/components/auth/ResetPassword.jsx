@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 
@@ -9,18 +9,15 @@ export default function ResetPassword() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const tokenHash = searchParams.get('token_hash');
+    const type = searchParams.get('type');
 
     useEffect(() => {
-        // Check if we have a session
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                navigate('/login');
-            }
-        };
-
-        checkSession();
-    }, [navigate]);
+        if (!tokenHash || type !== 'recovery') {
+            navigate('/login');
+        }
+    }, [tokenHash, type, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -39,21 +36,49 @@ export default function ResetPassword() {
         setLoading(true);
 
         try {
-            const { error } = await supabase.auth.updateUser({
-                password: password
+            // First, verify the OTP to ensure the token is valid
+            const { error: verifyError } = await supabase.auth.verifyOtp({
+                token_hash: tokenHash,
+                type: 'recovery',
+                options: {
+                    shouldCreateSession: false
+                }
             });
+
+            if (verifyError) throw verifyError;
+
+            // Then, attempt to update the password
+            const { error } = await supabase.auth.updateUser(
+                { password: password },
+                {
+                    // Force update even without an active session
+                    skipSessionRefresh: true
+                }
+            );
 
             if (error) throw error;
 
-            // Sign out after password reset
-            await supabase.auth.signOut();
-
-            // Show success message and redirect
-            alert('Password updated successfully! Please login with your new password.');
-            navigate('/login');
+            toast.success('Password updated successfully!', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: false
+            });
+            setTimeout(() => {
+                navigate('/login');
+            }, 4000);
         } catch (error) {
             console.error('Error resetting password:', error);
-            setError(error.message);
+
+            // Provide more specific error messages
+            if (error.message.includes('AuthSessionMissingError')) {
+                setError('Session expired. Please request a new password reset link.');
+            } else if (error.message.includes('Invalid token')) {
+                setError('Invalid or expired reset link. Please request a new one.');
+            } else {
+                setError(error.message || 'Failed to reset password. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
