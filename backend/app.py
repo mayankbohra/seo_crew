@@ -125,6 +125,13 @@ def download_file(userId, filename):
             'message': f'Error downloading file: {str(e)}'
         }), 500
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        'status': 'success',
+        'message': 'Welcome to the API'
+    })
+
 @app.route('/run/analysis', methods=['POST'])
 def run_analysis():
     try:
