@@ -3,9 +3,7 @@ import Hero from './components/home/Hero';
 import Features from './components/home/Features';
 import ProcessFlow from './components/home/ProcessFlow';
 import InstituteForm from './components/forms/InstituteForm';
-import ProgressStatus from './components/progress/ProgressStatus';
 import DownloadPage from './components/download/DownloadPage';
-import BlogGenerationForm from './components/forms/BlogGenerationForm';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
@@ -63,19 +61,9 @@ function App() {
                                         <LoginPage />
                                     </PublicRoute>
                                 } />
-                                <Route path="/progress" element={
-                                    <PrivateRoute>
-                                        <ProgressStatus />
-                                    </PrivateRoute>
-                                } />
                                 <Route path="/download" element={
                                     <PrivateRoute>
                                         <DownloadPage />
-                                    </PrivateRoute>
-                                } />
-                                <Route path="/generate-blog" element={
-                                    <PrivateRoute>
-                                        <BlogGenerationForm />
                                     </PrivateRoute>
                                 } />
                                 <Route path="/forgot-password" element={
