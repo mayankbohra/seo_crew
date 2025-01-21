@@ -16,7 +16,7 @@ openai = LLM(
 )
 
 anthropic = LLM(
-    model="claude-3-5-sonnet-20240620",
+    model="claude-3-5-sonnet-20241022",
     api_key=os.getenv("ANTHROPIC_API_KEY")
 )
 
@@ -60,7 +60,7 @@ class SeoCrew():
                 ),
                 SerperDevTool(api_key=serper_api_key)
             ],
-            llm=gemini,
+            llm=anthropic,
             verbose=False
         )
 
@@ -84,7 +84,7 @@ class SeoCrew():
                     errors='ignore'
                 )
             ],
-            llm=gemini,
+            llm=anthropic,
             verbose=False
         )
 

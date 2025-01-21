@@ -14,6 +14,11 @@ gemini = LLM(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
+anthropic = LLM(
+    model="claude-3-5-sonnet-20241022",
+    api_key=os.getenv("ANTHROPIC_API_KEY")
+)
+
 @CrewBase
 class AnalysisCrew():
     """Analysis Crew"""
@@ -57,7 +62,7 @@ class AnalysisCrew():
                     errors='ignore'
                 )
             ],
-            llm=gemini,
+            llm=anthropic,
             verbose=False
         )
 
