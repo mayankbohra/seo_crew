@@ -28,8 +28,7 @@ CORS(app, resources={
         "methods": ["GET", "POST", "OPTIONS", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization", "Accept"],
         "supports_credentials": True,
-        "expose_headers": ["Content-Type", "Authorization"],
-        "max_age": 600  # Cache preflight requests for 10 minutes
+        "expose_headers": ["Content-Type", "Authorization"]
     }
 })
 
@@ -58,7 +57,6 @@ def create_user_directory(userId):
     crew_dir.mkdir(exist_ok=True)
     data_dir.mkdir(exist_ok=True)
     blogs_dir.mkdir(exist_ok=True)
-
 
 def cleanup_user_directory(userId):
     """Clean up user-specific directory"""
@@ -201,23 +199,21 @@ def run_analysis():
         }), 500
 
 
-@app.route('/keywords/<userId>', methods=['GET'])
-def get_keywords(userId):
+@app.route('/keywords', methods=['GET'])
+def get_keywords():
     try:
-        if not userId:
+        user_id = request.args.get('userId')
+        if not user_id:
             return jsonify({
                 'status': 'error',
                 'message': 'User ID is required'
             }), 400
 
-        keywords = get_available_keywords(userId)
-        return jsonify({
-            'status': 'success',
-            'keywords': keywords
-        })
+        # Use the function from main.py
+        keywords_result = get_available_keywords(user_id)
 
+        return jsonify(keywords_result)
     except Exception as e:
-        print(f"Error in /keywords: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': str(e)

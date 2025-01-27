@@ -33,14 +33,15 @@ analyze_keyword_rankings_data:
     or external information.
 
   expected_output: >
-    MAKE SURE YOU ALWAYS provide a detailed markdown report containing:
-    1. ALL the required data tables
-    2. ALL the data tables for ALL the 5 competitors showing ALL the 10 keyword metrics and patterns for each competitor
-    3. COMPLETE data table showing user keyword performance
-    4. COMPLETE comparative analysis between user and the competitors rankings
-    5. COMPLETE strategic recommendations backed by specific data points
-    6. COMPLETE analysis based strictly on data from competitor_rankings.json and user_rankings.json
-    DO NOT write anything else other than the markdown report.
+    Generate an SEO Keyword Performance Analysis report.
+    Include the following sections:\n
+    1. Competitor Keyword Analysis: Create a table for each competitor (all the 5 competitors) showing
+    all 10 keywords for each competitor, Top Ranked URL, Rank, Search Volume, and Keyword Difficulty.
+    Add Patterns and Insights below the table.\n
+    2. User Keyword Analysis: Create a table for user keywords showing all 10 keywords, Top Ranked URL, Rank,
+    Search Volume, and Keyword Difficulty.\n
+    3. Comparative Analysis: Highlight key differences between competitor and user keyword performance.\n
+    4. Strategic Recommendations: Provide actionable suggestions for improving keyword rankings.
 
 
 generate_ad_copies:

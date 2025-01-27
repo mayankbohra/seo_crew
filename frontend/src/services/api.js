@@ -33,47 +33,46 @@ export const runAnalysis = async (data) => {
 export const getKeywords = async () => {
     try {
         const userId = localStorage.getItem('userId');
-        const response = await fetch(`${API_URL}/keywords/${userId}`, {
+        const response = await fetch(`${API_URL}/keywords?userId=${userId}`, {
             method: 'GET',
             headers: {
-                'Accept': 'application/json',
+                'Content-Type': 'application/json',
             },
-            credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to fetch keywords');
         }
 
-        return await response.json();
+        console.log("API Keywords:", data.keywords);
+        return data;
     } catch (error) {
-        console.error('API Error:', error);
+        console.error('Error fetching keywords:', error);
         throw error;
     }
 };
 
 export const saveKeywords = async (keywords) => {
     try {
-        const userId = localStorage.getItem('userId');
-        const response = await fetch(`${API_URL}/keywords/save/${userId}`, {
+        const response = await fetch(`${API_URL}/keywords/save/${localStorage.getItem('userId')}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
             },
-            body: JSON.stringify({
-                keywords,
-                userId
-            })
+            body: JSON.stringify({ keywords }),
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(data.message || 'Failed to save keywords');
         }
 
-        return await response.json();
+        return data;
     } catch (error) {
-        console.error('API Error:', error);
+        console.error('Error saving keywords:', error);
         throw error;
     }
 };

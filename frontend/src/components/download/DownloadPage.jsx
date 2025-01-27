@@ -15,7 +15,7 @@ export default function DownloadPage() {
     const [adContent, setAdContent] = useState('');
     const [blogOutlines, setBlogOutlines] = useState([]);
     const [downloadFiles, setDownloadFiles] = useState({});
-    const [keywords, setKeywords] = useState([]);
+    const [keywords, setKeywords] = useState({});
     const [selectedKeywords, setSelectedKeywords] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -27,6 +27,32 @@ export default function DownloadPage() {
             return;
         }
 
+        // Fetch keywords when analysis is complete
+        const fetchKeywords = async () => {
+            try {
+                console.log("Fetching keywords...");
+                const result = await getKeywords();
+
+                if (result.status === 'success') {
+                    console.log("Keywords fetched:", result.keywords);
+                    setKeywords(result.keywords);
+                    // Automatically switch to keywords tab
+                    setActiveTab('keywords');
+                } else {
+                    console.error("Failed to fetch keywords:", result.message);
+                    setError(result.message);
+                }
+            } catch (err) {
+                console.error("Error fetching keywords:", err);
+                setError(err.message);
+            }
+        };
+
+        // Fetch keywords if analysis result exists
+        if (state.analysisResult?.markdown?.analysis) {
+            fetchKeywords();
+        }
+
         // Set analysis content if available
         if (state.analysisResult?.markdown?.analysis) {
             setAnalysisContent(state.analysisResult.markdown.analysis);
@@ -34,19 +60,6 @@ export default function DownloadPage() {
                 ...prev,
                 ...(state.analysisResult.docxFiles || {})
             }));
-
-            // Fetch keywords after analysis is complete
-            const fetchKeywords = async () => {
-                try {
-                    const result = await getKeywords();
-                    if (result.status === 'success') {
-                        setKeywords(result.keywords);
-                    }
-                } catch (err) {
-                    setError(err.message);
-                }
-            };
-            fetchKeywords();
         }
 
         // Set SEO content if available
@@ -71,7 +84,7 @@ export default function DownloadPage() {
     }, [location.state, navigate]);
 
     const handleKeywordSubmit = async (selected) => {
-        setSelectedKeywords(selected); // Store selected keywords
+        setSelectedKeywords(selected);
         setIsLoading(true);
         setError(null);
         try {
@@ -147,17 +160,15 @@ export default function DownloadPage() {
     const TabButton = ({ id, label, count, onClick, isActive }) => (
         <button
             onClick={onClick}
-            className={`px-4 py-2 font-medium rounded-lg shadow-md ${
-                isActive
+            className={`px-4 py-2 font-medium rounded-lg shadow-md ${isActive
                     ? 'bg-indigo-600 text-white'
                     : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
+                }`}
         >
             {label}
             {count > 0 && (
-                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
-                    isActive ? 'bg-white text-indigo-600' : 'bg-indigo-100 text-indigo-600'
-                }`}>
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${isActive ? 'bg-white text-indigo-600' : 'bg-indigo-100 text-indigo-600'
+                    }`}>
                     {count}
                 </span>
             )}
@@ -167,11 +178,10 @@ export default function DownloadPage() {
     const BlogTabButton = ({ index, isActive }) => (
         <button
             onClick={() => setActiveBlogTab(index)}
-            className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                isActive
+            className={`px-4 py-2 text-sm font-medium rounded-lg ${isActive
                     ? 'bg-green-600 text-white'
                     : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
+                }`}
         >
             Blog {index + 1}
         </button>
@@ -212,11 +222,11 @@ export default function DownloadPage() {
                             isActive={activeTab === 'analysis'}
                         />
                     )}
-                    {keywords.length > 0 && (
+                    {Object.keys(keywords).length > 0 && (
                         <TabButton
                             id="keywords"
                             label="Keywords"
-                            count={keywords.length}
+                            count={Object.keys(keywords).length}
                             onClick={() => setActiveTab('keywords')}
                             isActive={activeTab === 'keywords'}
                         />
@@ -264,7 +274,7 @@ export default function DownloadPage() {
                             </motion.div>
                         )}
 
-                        {activeTab === 'keywords' && keywords.length > 0 && (
+                        {activeTab === 'keywords' && Object.keys(keywords).length > 0 && (
                             <div className="p-6">
                                 <KeywordSelection
                                     keywords={keywords}

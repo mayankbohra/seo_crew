@@ -33,31 +33,38 @@ export default function KeywordSelection({ keywords, onSubmit, isLoading, disabl
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {keywords.map((keyword) => (
-                            <div
-                                key={keyword}
-                                className={`flex items-center space-x-2 ${
-                                    (disabled || isLoading) ? 'opacity-50' : ''
-                                }`}
-                            >
-                                <input
-                                    type="checkbox"
-                                    id={keyword}
-                                    checked={localSelectedKeywords.includes(keyword)}
-                                    onChange={() => handleKeywordToggle(keyword)}
-                                    disabled={disabled || isLoading}
-                                    className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
-                                />
-                                <label
-                                    htmlFor={keyword}
-                                    className="text-sm text-gray-700"
-                                >
-                                    {keyword}
-                                </label>
+                    {Object.entries(keywords).map(([domain, domainKeywords]) => (
+                        <div key={domain} className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-3">
+                                {domain}
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {domainKeywords.map((keyword) => (
+                                    <div
+                                        key={keyword}
+                                        className={`flex items-center space-x-2 ${
+                                            (disabled || isLoading) ? 'opacity-50' : ''
+                                        }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            id={keyword}
+                                            checked={localSelectedKeywords.includes(keyword)}
+                                            onChange={() => handleKeywordToggle(keyword)}
+                                            disabled={disabled || isLoading}
+                                            className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                                        />
+                                        <label
+                                            htmlFor={keyword}
+                                            className="text-sm text-gray-700"
+                                        >
+                                            {keyword}
+                                        </label>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
 
                     <div className="flex justify-end">
                         <button

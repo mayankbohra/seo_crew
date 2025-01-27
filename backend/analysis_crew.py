@@ -26,21 +26,16 @@ class AnalysisCrew():
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
-    def __init__(self, user_id: str):
+    def __init__(self, user_id: str, inputs: dict):
         # Use user-specific output directory
         self.user_id = user_id
         self.output_dir = Path('outputs') / str(user_id)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         (self.output_dir / 'crew').mkdir(exist_ok=True)
 
-        self.inputs = {}
+        self.inputs = inputs
 
         super().__init__()
-
-    @before_kickoff
-    def setup(self, inputs):
-        """Initialize data before running tasks"""
-        self.inputs = inputs
 
     @agent
     def data_analyst_agent(self) -> Agent:
