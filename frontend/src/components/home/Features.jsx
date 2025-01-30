@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
+// Array of feature objects containing title, description, and icon for each feature
 const features = [
     {
         title: "Competitor Analysis",
@@ -16,8 +17,12 @@ const features = [
         description: "Create high-quality blog posts with AI assistance",
         icon: "✍️"
     }
-]
+];
 
+/**
+ * Features component displays key features of the application.
+ * It maps over the features array and renders each feature in a styled card.
+ */
 export default function Features() {
     return (
         <section id="features" className="py-20">

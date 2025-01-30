@@ -2,19 +2,24 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 
+/**
+ * Header component displays the navigation bar with user authentication options.
+ */
 export default function Header() {
-    const { user, signOut } = useAuth();
-    const location = useLocation();
+    const { user, signOut } = useAuth(); // Extract user and signOut function from Auth context
+    const location = useLocation(); // Get the current location
 
+    /**
+     * Handles user logout by signing out and clearing user-specific data.
+     */
     const handleLogout = async () => {
         try {
-            await signOut();
-            // Clear any user-specific data from localStorage
+            await signOut(); // Attempt to sign out the user
+            // Clear user-specific data from localStorage
             localStorage.removeItem('userId');
             localStorage.removeItem('blogOutline');
-            // Any other user-specific data that needs to be cleared
         } catch (error) {
-            console.error('Error signing out:', error);
+            console.error('Error signing out:', error); // Log any errors encountered during sign out
         }
     };
 
@@ -29,13 +34,8 @@ export default function Header() {
                 <div className="flex justify-between h-16 items-center">
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center">
-                            <img
-                                className="h-8 w-auto"
-                                src="/logo.svg"
-                                alt="Logo"
-                            />
                             <span className="ml-2 text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
-                                SEO Tool
+                                Jaipuria Institute of Management
                             </span>
                         </Link>
                     </div>
@@ -60,7 +60,7 @@ export default function Header() {
                         )}
                     </div>
 
-                    {/* Mobile menu button */}
+                    {/* Mobile menu button for logout */}
                     <div className="sm:hidden">
                         {user && (
                             <button

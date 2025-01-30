@@ -1,15 +1,15 @@
-from crewai import Agent, Crew, Task, LLM
-from crewai.project import CrewBase, agent, crew, task, before_kickoff
 from crewai_tools import FileReadTool, SerperDevTool, WebsiteSearchTool
+from crewai.project import CrewBase, agent, crew, task
+from crewai import Agent, Crew, Task, LLM
 from dotenv import load_dotenv
 from pathlib import Path
+import agentops
 import os
-import shutil
 
 load_dotenv()
-
 serper_api_key = os.getenv("SERPER_API_KEY")
 
+# Initialize LLMs with respective API keys
 openai = LLM(
     model="gpt-4o",
     api_key=os.getenv("OPENAI_API_KEY")
@@ -29,86 +29,146 @@ gemini = LLM(
 class SeoCrew():
     """SEO Content Generation Crew"""
 
+    agentops.init(
+        api_key=os.getenv("AGENTOPS_API_KEY"),
+        skip_auto_end_session=True
+    )
+
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
-    def __init__(self, user_id):
-        # Create user-specific output directory
-        self.user_id = user_id
+    def __init__(self, inputs: dict):
+        """
+        Initialize the SeoCrew with user ID and inputs.
 
-        self.inputs = {}
-        self.keyword_details = {}
-
-        super().__init__()
-
-    @before_kickoff
-    def setup(self, inputs):
-        """Initialize data before running tasks"""
-        self.inputs = inputs
+        Args:
+            user_id (str): The ID of the user.
+            inputs (dict): The input data for the crew.
+        """
+        try:
+            self.inputs = inputs
+            self.output_dir = Path('outputs') / str(self.inputs['user_id'])
+        except Exception as e:
+            print(f"Error initializing SeoCrew: {e}")
+            raise
 
     @agent
     def ad_copy_specialist_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['ad_copy_specialist'],
-            tools=[
-                FileReadTool(
-                    name="Read selected keywords data",
-                    description="Read the selected_keywords.json file",
-                    file_path=Path('outputs') / self.user_id / 'data' / 'selected_keywords_details.json',
-                    encoding='utf-8',
-                    errors='ignore'
-                ),
-                SerperDevTool(api_key=serper_api_key)
-            ],
-            llm=anthropic,
-            verbose=False
-        )
+        """Create an agent for generating ad copies.
+
+        Returns:
+            Agent: The ad copy specialist agent.
+        """
+        try:
+            return Agent(
+                config=self.agents_config['ad_copy_specialist'],
+                llm=openai,
+                verbose=True
+            )
+        except Exception as e:
+            print(f"Error creating ad copy specialist agent: {e}")
+            raise
 
     @agent
     def blog_outline_strategist_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['blog_outline_strategist'],
-            tools=[
-                FileReadTool(
-                    name="Read ad copies data",
-                    description="Read the ad copies from 2_ad_copies.md file",
-                    file_path=str(Path('outputs') / self.user_id / 'crew' / '2_ad_copies.md'),
-                    encoding='utf-8',
-                    errors='ignore'
-                ),
-                FileReadTool(
-                    name="Read selected keywords data",
-                    description="Read the selected keywords details",
-                    file_path=str(Path('outputs') / self.user_id / 'data' / 'selected_keywords_details.json'),
-                    encoding='utf-8',
-                    errors='ignore'
-                )
-            ],
-            llm=anthropic,
-            verbose=False
-        )
+        """Create an agent for generating blog post outlines.
+
+        Returns:
+            Agent: The blog outline strategist agent.
+        """
+        try:
+            return Agent(
+                config=self.agents_config['blog_outline_strategist'],
+                llm=anthropic,
+                verbose=True
+            )
+        except Exception as e:
+            print(f"Error creating blog outline strategist agent: {e}")
+            raise
 
     @task
     def generate_ad_copies_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['generate_ad_copies'],
-            agent=self.ad_copy_specialist_agent(),
-            output_file=str(Path('outputs') / self.user_id / 'crew' / '2_ad_copies.md')
-        )
+        """Define the task for generating ad copies.
+
+        Returns:
+            Task: The task for generating ad copies.
+        """
+        try:
+            return Task(
+                config=self.tasks_config['generate_ad_copies'],
+                agent=self.ad_copy_specialist_agent(),
+                tools=[
+                    FileReadTool(
+                        name="Read selected keywords data",
+                        description="Read the selected_keywords.json file",
+                        file_path=self.output_dir / 'data' / 'selected_keywords_details.json',
+                        encoding='utf-8',
+                        errors='ignore'
+                    ),
+                    WebsiteSearchTool(
+                        website="https://www.jaipuria.ac.in",
+                    ),
+                    WebsiteSearchTool(
+                        website="https://www.jaipuria.ac.in/about-us",
+                    ),
+                    WebsiteSearchTool(
+                        website="https://www.jaipuria.ac.in/mba-programs",
+                    ),
+                    SerperDevTool(api_key=serper_api_key)
+                ],
+                output_file=str(self.output_dir / 'crew' / '2_ad_copies.md')
+            )
+        except Exception as e:
+            print(f"Error generating ad copies task: {e}")
+            raise
 
     @task
     def generate_blog_post_outlines_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['generate_blog_post_outlines'],
-            agent=self.blog_outline_strategist_agent(),
-            context=[self.generate_ad_copies_task()],
-            output_file=str(Path('outputs') / self.user_id / 'crew' / '3_blog_post_outlines.md')
-        )
+        """Define the task for generating blog post outlines.
+
+        Returns:
+            Task: The task for generating blog post outlines.
+        """
+        try:
+            return Task(
+                config=self.tasks_config['generate_blog_post_outlines'],
+                agent=self.blog_outline_strategist_agent(),
+                tools=[
+                    FileReadTool(
+                        name="Read ad copies data",
+                        description="Read the ad copies from 2_ad_copies.md file",
+                        file_path=self.output_dir / 'crew' / '2_ad_copies.md',
+                        encoding='utf-8',
+                        errors='ignore'
+                    ),
+                    FileReadTool(
+                        name="Read selected keywords data",
+                        description="Read the selected keywords details",
+                        file_path=self.output_dir / 'data' / 'selected_keywords_details.json',
+                        encoding='utf-8',
+                        errors='ignore'
+                    )
+                ],
+                context=[self.generate_ad_copies_task()],
+                output_file=str(self.output_dir / 'crew' / '3_blog_post_outlines.md')
+            )
+        except Exception as e:
+            print(f"Error generating blog post outlines task: {e}")
+            raise
 
     @crew
     def crew(self) -> Crew:
-        return Crew(
-            agents=self.agents,
-            tasks=self.tasks,
-            verbose=True
-        )
+        """Create the crew for SEO content generation.
+
+        Returns:
+            Crew: The SEO content generation crew.
+        """
+        try:
+            return Crew(
+                agents=self.agents,
+                tasks=self.tasks,
+                verbose=True
+            )
+        except Exception as e:
+            print(f"Error creating crew: {e}")
+            raise

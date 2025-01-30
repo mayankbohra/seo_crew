@@ -2,40 +2,48 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
+import { toast } from 'react-toastify'; // Import toast for notifications
 
+/**
+ * VerifyOTP component allows users to verify their email using a one-time password (OTP).
+ */
 export default function VerifyOTP() {
-    const [otp, setOtp] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [email, setEmail] = useState('');
-    const navigate = useNavigate();
+    const [otp, setOtp] = useState(''); // State for OTP input
+    const [loading, setLoading] = useState(false); // State to manage loading status
+    const [error, setError] = useState(null); // State to manage error messages
+    const [email, setEmail] = useState(''); // State to store the user's email
+    const navigate = useNavigate(); // Hook to programmatically navigate
 
+    // Effect to retrieve stored email from local storage
     useEffect(() => {
         const storedEmail = localStorage.getItem('verificationEmail');
         if (!storedEmail) {
-            navigate('/signup');
+            navigate('/signup'); // Redirect to signup if no email is found
             return;
         }
-        setEmail(storedEmail);
+        setEmail(storedEmail); // Set the email state
     }, [navigate]);
 
+    // Handle OTP verification
     const handleVerify = async (e) => {
-        e.preventDefault();
-        setError(null);
-        setLoading(true);
+        e.preventDefault(); // Prevent default form submission
+        setError(null); // Reset error state
+        setLoading(true); // Set loading state
 
         try {
+            // Verify the OTP with Supabase
             const { error } = await supabase.auth.verifyOtp({
                 email,
                 token: otp,
                 type: 'signup'
             });
 
-            if (error) throw error;
+            if (error) throw error; // Throw error if verification fails
 
-            // Clear stored email
+            // Clear stored email after successful verification
             localStorage.removeItem('verificationEmail');
 
+            // Notify user of successful verification
             toast.success('Email verified successfully!', {
                 position: "top-right",
                 autoClose: 2000,
@@ -43,14 +51,16 @@ export default function VerifyOTP() {
                 closeOnClick: false,
                 pauseOnHover: false
             });
+
+            // Redirect to login after a short delay
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
         } catch (error) {
-            console.error('Verification error:', error);
-            setError(error.message);
+            console.error('Verification error:', error); // Log error for debugging
+            setError(error.message); // Set error message for user feedback
         } finally {
-            setLoading(false);
+            setLoading(false); // Reset loading state
         }
     };
 
@@ -76,7 +86,7 @@ export default function VerifyOTP() {
                     <form onSubmit={handleVerify} className="space-y-6">
                         {error && (
                             <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-                                {error}
+                                {error} {/* Display error message if exists */}
                             </div>
                         )}
 
@@ -86,8 +96,8 @@ export default function VerifyOTP() {
                             </label>
                             <input
                                 type="text"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
+                                value={otp} // Controlled input for OTP
+                                onChange={(e) => setOtp(e.target.value)} // Update OTP state on change
                                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200
                                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                          transition-colors"
@@ -97,7 +107,7 @@ export default function VerifyOTP() {
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading} // Disable button while loading
                             className="w-full py-3 px-4 bg-indigo-600 text-white rounded-lg
                                      hover:bg-indigo-700 transition-colors flex items-center justify-center
                                      disabled:opacity-50 disabled:cursor-not-allowed"

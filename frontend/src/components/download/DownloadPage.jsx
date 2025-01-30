@@ -4,8 +4,11 @@ import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import KeywordSelection from '../keywords/KeywordSelection';
-import { getKeywords, saveKeywords, runSeo, generateBlog, cleanupUserData } from '../../services/api';
+import { getKeywords, saveKeywords, runSeo, cleanupUserData } from '../../services/api';
 
+/**
+ * DownloadPage component handles the display and download of generated content.
+ */
 export default function DownloadPage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -22,6 +25,8 @@ export default function DownloadPage() {
 
     useEffect(() => {
         const state = location.state;
+
+        // Redirect if institution or domain is not provided
         if (!state?.institution || !state?.domain) {
             navigate('/');
             return;
@@ -30,14 +35,11 @@ export default function DownloadPage() {
         // Fetch keywords when analysis is complete
         const fetchKeywords = async () => {
             try {
-                console.log("Fetching keywords...");
                 const result = await getKeywords();
 
                 if (result.status === 'success') {
-                    console.log("Keywords fetched:", result.keywords);
                     setKeywords(result.keywords);
-                    // Automatically switch to keywords tab
-                    setActiveTab('keywords');
+                    setActiveTab('keywords'); // Switch to keywords tab
                 } else {
                     console.error("Failed to fetch keywords:", result.message);
                     setError(result.message);
@@ -51,10 +53,6 @@ export default function DownloadPage() {
         // Fetch keywords if analysis result exists
         if (state.analysisResult?.markdown?.analysis) {
             fetchKeywords();
-        }
-
-        // Set analysis content if available
-        if (state.analysisResult?.markdown?.analysis) {
             setAnalysisContent(state.analysisResult.markdown.analysis);
             setDownloadFiles(prev => ({
                 ...prev,
@@ -161,8 +159,8 @@ export default function DownloadPage() {
         <button
             onClick={onClick}
             className={`px-4 py-2 font-medium rounded-lg shadow-md ${isActive
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
                 }`}
         >
             {label}
@@ -179,8 +177,8 @@ export default function DownloadPage() {
         <button
             onClick={() => setActiveBlogTab(index)}
             className={`px-4 py-2 text-sm font-medium rounded-lg ${isActive
-                    ? 'bg-green-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                ? 'bg-green-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
                 }`}
         >
             Blog {index + 1}
@@ -248,19 +246,19 @@ export default function DownloadPage() {
                             isActive={activeTab === 'outlines'}
                         />
                     )}
-                    </div>
+                </div>
 
                 <div className="mt-4">
                     <div className="bg-white rounded-lg shadow-xl min-h-[600px]">
                         {activeTab === 'analysis' && analysisContent && (
-                        <motion.div
+                            <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 className="p-6 prose max-w-none"
                             >
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {analysisContent}
-                                    </ReactMarkdown>
+                                </ReactMarkdown>
                                 {downloadFiles.analysis && (
                                     <div className="mt-4 text-center">
                                         <button
@@ -287,14 +285,14 @@ export default function DownloadPage() {
                         )}
 
                         {activeTab === 'ads' && adContent && (
-                                        <motion.div
+                            <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 className="p-6 prose max-w-none"
-                                        >
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            >
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {adContent}
-                                            </ReactMarkdown>
+                                </ReactMarkdown>
                                 {downloadFiles.ad && (
                                     <div className="mt-4 text-center">
                                         <button
@@ -303,9 +301,9 @@ export default function DownloadPage() {
                                         >
                                             Download Ad Copies
                                         </button>
-                                </div>
-                            )}
-                        </motion.div>
+                                    </div>
+                                )}
+                            </motion.div>
                         )}
 
                         {activeTab === 'outlines' && blogOutlines.length > 0 && (
@@ -319,7 +317,7 @@ export default function DownloadPage() {
                                         />
                                     ))}
                                 </div>
-                    <motion.div
+                                <motion.div
                                     key={activeBlogTab}
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
@@ -345,7 +343,7 @@ export default function DownloadPage() {
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {`# Blog Outline ${activeBlogTab + 1}\n\n${blogOutlines[activeBlogTab]}`}
                                     </ReactMarkdown>
-                    </motion.div>
+                                </motion.div>
                                 {downloadFiles.outlines && (
                                     <div className="mt-4 text-center">
                                         <button

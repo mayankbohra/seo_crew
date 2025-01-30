@@ -2,27 +2,34 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
+import { toast } from 'react-toastify'; // Import toast for notifications
 
+/**
+ * ResetPassword component allows users to reset their password using a token.
+ */
 export default function ResetPassword() {
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const tokenHash = searchParams.get('token_hash');
-    const type = searchParams.get('type');
+    const [password, setPassword] = useState(''); // State for new password
+    const [confirmPassword, setConfirmPassword] = useState(''); // State for confirming new password
+    const [loading, setLoading] = useState(false); // State to manage loading status
+    const [error, setError] = useState(null); // State to manage error messages
+    const navigate = useNavigate(); // Hook to programmatically navigate
+    const [searchParams] = useSearchParams(); // Hook to access URL search parameters
+    const tokenHash = searchParams.get('token_hash'); // Extract token hash from URL
+    const type = searchParams.get('type'); // Extract type from URL
 
+    // Effect to check token validity and redirect if invalid
     useEffect(() => {
         if (!tokenHash || type !== 'recovery') {
-            navigate('/login');
+            navigate('/login'); // Redirect to login if token is invalid
         }
     }, [tokenHash, type, navigate]);
 
+    // Handle form submission for password reset
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError(null);
+        e.preventDefault(); // Prevent default form submission
+        setError(null); // Reset error state
 
+        // Validate password and confirmation
         if (password !== confirmPassword) {
             setError("Passwords don't match");
             return;
@@ -33,10 +40,10 @@ export default function ResetPassword() {
             return;
         }
 
-        setLoading(true);
+        setLoading(true); // Set loading state
 
         try {
-            // First, verify the OTP to ensure the token is valid
+            // Verify the OTP to ensure the token is valid
             const { error: verifyError } = await supabase.auth.verifyOtp({
                 token_hash: tokenHash,
                 type: 'recovery',
@@ -45,19 +52,19 @@ export default function ResetPassword() {
                 }
             });
 
-            if (verifyError) throw verifyError;
+            if (verifyError) throw verifyError; // Throw error if verification fails
 
-            // Then, attempt to update the password
+            // Attempt to update the password
             const { error } = await supabase.auth.updateUser(
                 { password: password },
                 {
-                    // Force update even without an active session
-                    skipSessionRefresh: true
+                    skipSessionRefresh: true // Force update even without an active session
                 }
             );
 
-            if (error) throw error;
+            if (error) throw error; // Throw error if update fails
 
+            // Notify user of successful password update
             toast.success('Password updated successfully!', {
                 position: "top-right",
                 autoClose: 2000,
@@ -65,13 +72,15 @@ export default function ResetPassword() {
                 closeOnClick: false,
                 pauseOnHover: false
             });
+
+            // Redirect to login after a delay
             setTimeout(() => {
                 navigate('/login');
             }, 4000);
         } catch (error) {
-            console.error('Error resetting password:', error);
+            console.error('Error resetting password:', error); // Log error for debugging
 
-            // Provide more specific error messages
+            // Provide specific error messages based on error type
             if (error.message.includes('AuthSessionMissingError')) {
                 setError('Session expired. Please request a new password reset link.');
             } else if (error.message.includes('Invalid token')) {
@@ -80,7 +89,7 @@ export default function ResetPassword() {
                 setError(error.message || 'Failed to reset password. Please try again.');
             }
         } finally {
-            setLoading(false);
+            setLoading(false); // Reset loading state
         }
     };
 
@@ -105,7 +114,7 @@ export default function ResetPassword() {
                 >
                     {error && (
                         <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
-                            {error}
+                            {error} {/* Display error message if exists */}
                         </div>
                     )}
 
@@ -118,7 +127,7 @@ export default function ResetPassword() {
                                 id="password"
                                 type="password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => setPassword(e.target.value)} // Update password state on change
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md
                                          shadow-sm focus:outline-none focus:ring-indigo-500
                                          focus:border-indigo-500"
@@ -134,7 +143,7 @@ export default function ResetPassword() {
                                 id="confirmPassword"
                                 type="password"
                                 value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                onChange={(e) => setConfirmPassword(e.target.value)} // Update confirm password state on change
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md
                                          shadow-sm focus:outline-none focus:ring-indigo-500
                                          focus:border-indigo-500"
@@ -144,7 +153,7 @@ export default function ResetPassword() {
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading} // Disable button while loading
                             className="w-full py-3 px-4 bg-indigo-600 text-white rounded-lg
                                      hover:bg-indigo-700 transition-colors flex items-center justify-center
                                      disabled:opacity-50 disabled:cursor-not-allowed"

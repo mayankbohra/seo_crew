@@ -141,4 +141,4 @@ def generate_blog(blog_outline, user_id):
 
 if __name__ == "__main__":
     blog_outline = input("Enter the blog outline: ")
-    generate_blog(blog_outline, "850a8abb-1114-44a6-a25d-f9e6a1becc62")
+    generate_blog(blog_outline, "0d715b5b-c5b7-4919-961a-237d793267e1")

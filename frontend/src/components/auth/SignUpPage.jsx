@@ -4,17 +4,24 @@ import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'react-toastify';
 
+/**
+ * SignUpPage component allows users to create a new account.
+ */
 export default function SignUpPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const navigate = useNavigate();
+    const [email, setEmail] = useState(''); // State for email input
+    const [password, setPassword] = useState(''); // State for password input
+    const [loading, setLoading] = useState(false); // State to manage loading status
+    const [error, setError] = useState(null); // State to manage error messages
+    const navigate = useNavigate(); // Hook to programmatically navigate
 
+    /**
+     * Handles the sign-up process.
+     * @param {Event} e - The event triggered by form submission.
+     */
     const handleSignUp = async (e) => {
-        e.preventDefault();
-        setError(null);
-        setLoading(true);
+        e.preventDefault(); // Prevent default form submission behavior
+        setError(null); // Reset error state
+        setLoading(true); // Set loading state to true
 
         try {
             // Check if email domain is allowed
@@ -23,6 +30,7 @@ export default function SignUpPage() {
                 throw new Error(`Only ${import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN} email addresses are allowed`);
             }
 
+            // Attempt to sign up with Supabase
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -31,7 +39,7 @@ export default function SignUpPage() {
                 }
             });
 
-            if (error) throw error;
+            if (error) throw error; // Throw error if sign-up fails
 
             if (data?.user) {
                 // Store email temporarily for OTP verification
@@ -44,14 +52,14 @@ export default function SignUpPage() {
                     pauseOnHover: false
                 });
                 setTimeout(() => {
-                    navigate('/verify-otp');
+                    navigate('/verify-otp'); // Redirect to OTP verification page
                 }, 2000);
             }
         } catch (error) {
-            console.error('Signup error:', error);
-            setError(error.message);
+            console.error('Signup error:', error); // Log error for debugging
+            setError(error.message); // Set error message for user feedback
         } finally {
-            setLoading(false);
+            setLoading(false); // Reset loading state
         }
     };
 
@@ -77,7 +85,7 @@ export default function SignUpPage() {
                     <form onSubmit={handleSignUp} className="space-y-6">
                         {error && (
                             <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-                                {error}
+                                {error} {/* Display error message if exists */}
                             </div>
                         )}
 
@@ -88,7 +96,7 @@ export default function SignUpPage() {
                             <input
                                 type="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => setEmail(e.target.value)} // Update email state on change
                                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200
                                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                          transition-colors"
@@ -103,7 +111,7 @@ export default function SignUpPage() {
                             <input
                                 type="password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => setPassword(e.target.value)} // Update password state on change
                                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200
                                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                          transition-colors"
@@ -114,7 +122,7 @@ export default function SignUpPage() {
                         <div className="flex flex-col space-y-3">
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading} // Disable button while loading
                                 className="w-full py-3 px-4 bg-indigo-600 text-white rounded-lg
                                          hover:bg-indigo-700 transition-colors flex items-center justify-center
                                          disabled:opacity-50 disabled:cursor-not-allowed"
@@ -134,7 +142,7 @@ export default function SignUpPage() {
 
                             <button
                                 type="button"
-                                onClick={() => navigate('/login')}
+                                onClick={() => navigate('/login')} // Navigate to login page
                                 className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                             >
                                 Already have an account? Sign in

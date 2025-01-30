@@ -5,34 +5,47 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 
+/**
+ * LoginPage component for user authentication.
+ *
+ * This component allows users to log in using their email and password.
+ * It handles user authentication and redirects to the home page upon successful login.
+ */
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const navigate = useNavigate();
-    const { user } = useAuth();
+    const [email, setEmail] = useState(''); // State for email input
+    const [password, setPassword] = useState(''); // State for password input
+    const [loading, setLoading] = useState(false); // State to manage loading status
+    const [error, setError] = useState(null); // State to manage error messages
+    const navigate = useNavigate(); // Hook to programmatically navigate
+    const { user } = useAuth(); // Access user authentication context
 
-    // Redirect if already authenticated
+    // Redirect to home page if user is already authenticated
     useEffect(() => {
         if (user) {
             navigate('/', { replace: true });
         }
     }, [user, navigate]);
 
+    /**
+     * Handles the login process.
+     *
+     * @param {Event} e - The event triggered by form submission.
+     */
     const handleLogin = async (e) => {
-        e.preventDefault();
-        setError(null);
-        setLoading(true);
+        e.preventDefault(); // Prevent default form submission behavior
+        setError(null); // Reset error state
+        setLoading(true); // Set loading state to true
 
         try {
+            // Attempt to sign in with Supabase
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            if (error) throw error;
+            if (error) throw error; // Throw error if sign-in fails
 
+            // Notify user of successful login
             toast.success('Login successful!', {
                 position: "top-right",
                 autoClose: 2000,
@@ -42,12 +55,13 @@ export default function LoginPage() {
             });
 
             if (data?.user) {
-                navigate('/', { replace: true });
+                navigate('/', { replace: true }); // Redirect to home page if user data exists
             }
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Login error:', error); // Log error for debugging
+            setError('Login failed. Please check your credentials.'); // Set error message for user feedback
         } finally {
-            setLoading(false);
+            setLoading(false); // Reset loading state
         }
     };
 
@@ -75,7 +89,7 @@ export default function LoginPage() {
                     <form onSubmit={handleLogin} className="space-y-6">
                         {error && (
                             <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-                                {error}
+                                {error} {/* Display error message if exists */}
                             </div>
                         )}
 
@@ -86,7 +100,7 @@ export default function LoginPage() {
                             <input
                                 type="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => setEmail(e.target.value)} // Update email state on change
                                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200
                                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                          transition-colors"
@@ -101,7 +115,7 @@ export default function LoginPage() {
                             <input
                                 type="password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => setPassword(e.target.value)} // Update password state on change
                                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200
                                          focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                          transition-colors"
@@ -112,7 +126,7 @@ export default function LoginPage() {
                         <div className="flex flex-col space-y-3">
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading} // Disable button while loading
                                 className="w-full py-3 px-4 bg-indigo-600 text-white rounded-lg
                                          hover:bg-indigo-700 transition-colors flex items-center justify-center
                                          disabled:opacity-50 disabled:cursor-not-allowed"
@@ -132,7 +146,7 @@ export default function LoginPage() {
 
                             <button
                                 type="button"
-                                onClick={() => navigate('/forgot-password')}
+                                onClick={() => navigate('/forgot-password')} // Navigate to forgot password page
                                 className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                             >
                                 Forgot Password?
@@ -140,7 +154,7 @@ export default function LoginPage() {
 
                             <button
                                 type="button"
-                                onClick={() => navigate('/signup')}
+                                onClick={() => navigate('/signup')} // Navigate to signup page
                                 className="pt-2 text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                             >
                                 Don't have an account? Sign Up

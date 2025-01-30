@@ -7,7 +7,6 @@ from typing import Type
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import contextlib
-from pathlib import Path
 
 load_dotenv()
 
@@ -20,15 +19,23 @@ class SpyfuTool(BaseTool):
     name: str = "SpyFu SEO Analysis Tool"
     description: str = (
         "Use this tool to get either top SEO competitors or newly ranking keywords. "
-        "Set analysis_type to 'competitors' for competitor analysis or 'rankings' for newly ranking keywords."
     )
     args_schema: Type[BaseModel] = SpyfuToolInput
 
     def __init__(self, **data):
+        """Initialize the SpyfuTool with provided data."""
         super().__init__(**data)
 
     def _run(self, domain: str, analysis_type: str) -> str:
-        """Run the specified type of analysis"""
+        """Run the specified type of analysis.
+
+        Args:
+            domain (str): The domain to analyze.
+            analysis_type (str): The type of analysis to perform ('competitors' or 'rankings').
+
+        Returns:
+            str: JSON string containing the analysis results or error message.
+        """
         if analysis_type.lower() == 'competitors':
             result = self._get_top_competitors(domain)
         elif analysis_type.lower() == 'rankings':
@@ -39,7 +46,14 @@ class SpyfuTool(BaseTool):
         return result
 
     def _get_auth_headers(self):
-        """Get authentication headers for SpyFu API"""
+        """Get authentication headers for SpyFu API.
+
+        Returns:
+            dict: A dictionary containing the authorization headers.
+
+        Raises:
+            ValueError: If API credentials are not set.
+        """
         api_id = os.getenv("SPYFU_API_ID")
         secret_key = os.getenv("SPYFU_SECRET_KEY")
 
@@ -53,11 +67,25 @@ class SpyfuTool(BaseTool):
         }
 
     def _clean_domain(self, domain: str) -> str:
-        """Clean domain URL"""
+        """Clean domain URL by removing protocol and trailing slashes.
+
+        Args:
+            domain (str): The domain URL to clean.
+
+        Returns:
+            str: The cleaned domain URL.
+        """
         return domain.replace('https://', '').replace('http://', '').strip('/ ')
 
     def _get_top_competitors(self, domain: str) -> str:
-        """Get top SEO competitors data"""
+        """Get top SEO competitors data.
+
+        Args:
+            domain (str): The domain to analyze.
+
+        Returns:
+            str: JSON string containing the top competitors data or error message.
+        """
         with contextlib.closing(http.client.HTTPSConnection("www.spyfu.com")) as conn:
             headers = self._get_auth_headers()
             clean_domain = self._clean_domain(domain)
@@ -88,7 +116,14 @@ class SpyfuTool(BaseTool):
                 return json.dumps({"error": error_msg})
 
     def _get_just_made_it_keywords(self, domain: str) -> str:
-        """Get newly ranking keywords data with filtered fields"""
+        """Get newly ranking keywords data with filtered fields.
+
+        Args:
+            domain (str): The domain to analyze.
+
+        Returns:
+            str: JSON string containing the newly ranked keywords data or error message.
+        """
         with contextlib.closing(http.client.HTTPSConnection("www.spyfu.com")) as conn:
             headers = self._get_auth_headers()
             clean_domain = self._clean_domain(domain)

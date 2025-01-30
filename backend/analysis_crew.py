@@ -1,8 +1,12 @@
-from pathlib import Path
-from crewai import Agent, Crew, Task, LLM
 from crewai.project import CrewBase, agent, crew, task, before_kickoff
+from crewai import Agent, Crew, Task, LLM
 from crewai_tools import FileReadTool
+from dotenv import load_dotenv
+from pathlib import Path
+import agentops
 import os
+
+load_dotenv()
 
 openai = LLM(
     model="gpt-4o",
@@ -21,26 +25,56 @@ anthropic = LLM(
 
 @CrewBase
 class AnalysisCrew():
-    """Analysis Crew"""
+    """Analysis Crew for processing and analyzing data."""
+
+    agentops.init(
+        api_key=os.getenv("AGENTOPS_API_KEY"),
+        skip_auto_end_session=True
+    )
 
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
-    def __init__(self, user_id: str, inputs: dict):
-        # Use user-specific output directory
-        self.user_id = user_id
-        self.output_dir = Path('outputs') / str(user_id)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        (self.output_dir / 'crew').mkdir(exist_ok=True)
+    def __init__(self, inputs: dict):
+        """
+        Initialize the AnalysisCrew with user-specific settings.
 
-        self.inputs = inputs
-
-        super().__init__()
+        Args:
+            user_id (str): The ID of the user for whom the analysis is being performed.
+            inputs (dict): The inputs required for the analysis.
+        """
+        try:
+            self.inputs = inputs
+            self.output_dir = Path('outputs') / str(self.inputs['user_id'])
+        except Exception as e:
+            print(f"Error initializing AnalysisCrew: {e}")
+            raise
 
     @agent
     def data_analyst_agent(self) -> Agent:
+        """
+        Create and return a data analyst agent configured with necessary tools.
+
+        Returns:
+            Agent: The configured data analyst agent.
+        """
         return Agent(
             config=self.agents_config['data_analyst'],
+            llm=anthropic,
+            verbose=False
+        )
+
+    @task
+    def analyze_keyword_rankings_data_task(self) -> Task:
+        """
+        Create and return a task for analyzing keyword rankings data.
+
+        Returns:
+            Task: The configured task for analyzing keyword rankings data.
+        """
+        return Task(
+            config=self.tasks_config['analyze_keyword_rankings_data'],
+            agent=self.data_analyst_agent(),
             tools=[
                 FileReadTool(
                     name="Read competitor rankings data",
@@ -57,22 +91,23 @@ class AnalysisCrew():
                     errors='ignore'
                 )
             ],
-            llm=anthropic,
-            verbose=False
-        )
-
-    @task
-    def analyze_keyword_rankings_data_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['analyze_keyword_rankings_data'],
-            agent=self.data_analyst_agent(),
             output_file=str(self.output_dir / 'crew' / '1_analysis.md')
         )
 
     @crew
     def crew(self) -> Crew:
-        return Crew(
-            agents=self.agents,
-            tasks=self.tasks,
-            verbose=True
-        )
+        """
+        Create and return the crew for executing tasks.
+
+        Returns:
+            Crew: The configured crew with agents and tasks.
+        """
+        try:
+            return Crew(
+                agents=self.agents,
+                tasks=self.tasks,
+                verbose=True
+            )
+        except Exception as e:
+            print(f"Error creating crew: {e}")
+            raise

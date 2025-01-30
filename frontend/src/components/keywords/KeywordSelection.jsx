@@ -1,23 +1,47 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
+/**
+ * KeywordSelection component allows users to select target keywords for content generation.
+ *
+ * @param {Object} props - Component properties.
+ * @param {Object} props.keywords - An object containing keywords categorized by domain.
+ * @param {Function} props.onSubmit - Callback function to handle the submission of selected keywords.
+ * @param {boolean} props.isLoading - Indicates if the component is in a loading state.
+ * @param {boolean} props.disabled - Indicates if the component is disabled.
+ * @param {Array} props.selectedKeywords - Initial selected keywords.
+ */
 export default function KeywordSelection({ keywords, onSubmit, isLoading, disabled, selectedKeywords = [] }) {
     const [localSelectedKeywords, setLocalSelectedKeywords] = useState(selectedKeywords);
 
+    /**
+     * Toggles the selection of a keyword.
+     *
+     * @param {string} keyword - The keyword to toggle.
+     */
     const handleKeywordToggle = (keyword) => {
-        if (disabled || isLoading) return;
+        if (disabled || isLoading) return; // Prevent toggling if disabled or loading
 
         setLocalSelectedKeywords(prev =>
             prev.includes(keyword)
-                ? prev.filter(k => k !== keyword)
-                : [...prev, keyword]
+                ? prev.filter(k => k !== keyword) // Remove keyword if already selected
+                : [...prev, keyword] // Add keyword if not selected
         );
     };
 
+    /**
+     * Handles the form submission.
+     *
+     * @param {Event} e - The form submission event.
+     */
     const handleSubmit = (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Prevent default form submission behavior
         if (!disabled && !isLoading) {
-            onSubmit(localSelectedKeywords);
+            try {
+                onSubmit(localSelectedKeywords); // Call the onSubmit function with selected keywords
+            } catch (error) {
+                console.error('Error during submission:', error); // Log any errors during submission
+            }
         }
     };
 
@@ -42,9 +66,8 @@ export default function KeywordSelection({ keywords, onSubmit, isLoading, disabl
                                 {domainKeywords.map((keyword) => (
                                     <div
                                         key={keyword}
-                                        className={`flex items-center space-x-2 ${
-                                            (disabled || isLoading) ? 'opacity-50' : ''
-                                        }`}
+                                        className={`flex items-center space-x-2 ${(disabled || isLoading) ? 'opacity-50' : ''
+                                            }`}
                                     >
                                         <input
                                             type="checkbox"

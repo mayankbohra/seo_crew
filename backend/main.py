@@ -10,45 +10,62 @@ import os
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
 def fetch_data_from_spyfu(domain_url: str, output_dir: Path):
-    """Fetch and save data from SpyFu"""
-    spy_tool = SpyfuTool()
+    """Fetch and save data from SpyFu.
 
-    print("\nFetching user rankings...")
-    user_rankings = spy_tool._get_just_made_it_keywords(domain_url)
-    user_rankings_json = json.loads(user_rankings)
+    Args:
+        domain_url (str): The domain URL to fetch data for.
+        output_dir (Path): The directory where the output data will be saved.
+    """
+    try:
+        spy_tool = SpyfuTool()
 
-    with open(output_dir / 'data' / 'user_rankings.json', 'w', encoding='utf-8') as f:
-        json.dump(user_rankings_json, f, indent=2, ensure_ascii=False)
+        print("\nFetching user rankings...")
+        user_rankings = spy_tool._get_just_made_it_keywords(domain_url)
+        user_rankings_json = json.loads(user_rankings)
 
-    print("\nFetching competitor rankings...")
-    competitors = spy_tool._get_top_competitors(domain=domain_url)
-    competitors_json = json.loads(competitors)
+        with open(output_dir / 'data' / 'user_rankings.json', 'w', encoding='utf-8') as f:
+            json.dump(user_rankings_json, f, indent=2, ensure_ascii=False)
 
-    with open(output_dir / 'data' / 'competitors.json', 'w', encoding='utf-8') as f:
-        json.dump(competitors_json, f, indent=2, ensure_ascii=False)
+        print("\nFetching competitor rankings...")
+        competitors = spy_tool._get_top_competitors(domain=domain_url)
+        competitors_json = json.loads(competitors)
 
-    rankings_data = {}
-    for competitor in competitors_json['results']:
-        domain = competitor['domain']
-        print(f"\nFetching rankings for: {domain}")
+        with open(output_dir / 'data' / 'competitors.json', 'w', encoding='utf-8') as f:
+            json.dump(competitors_json, f, indent=2, ensure_ascii=False)
 
-        rankings = spy_tool._get_just_made_it_keywords(domain)
-        rankings_json = json.loads(rankings)
-        rankings_data[domain] = rankings_json
+        rankings_data = {}
+        for competitor in competitors_json['results']:
+            domain = competitor['domain']
+            print(f"\nFetching rankings for: {domain}")
 
-    with open(output_dir / 'data' / 'competitor_rankings.json', 'w', encoding='utf-8') as f:
-        json.dump(rankings_data, f, indent=2, ensure_ascii=False)
+            rankings = spy_tool._get_just_made_it_keywords(domain)
+            rankings_json = json.loads(rankings)
+            rankings_data[domain] = rankings_json
+
+        with open(output_dir / 'data' / 'competitor_rankings.json', 'w', encoding='utf-8') as f:
+            json.dump(rankings_data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error fetching data from SpyFu: {str(e)}")
+        raise
 
 
 def run_analysis_crew(user_id: str, institution_name: str, domain_url: str, output_dir: Path):
-    """Run the analysis crew"""
+    """Run the analysis crew.
+
+    Args:
+        user_id (str): Unique identifier for the user.
+        institution_name (str): Name of the institution.
+        domain_url (str): The domain URL to analyze.
+        output_dir (Path): The directory where output data will be saved.
+    """
     try:
         print(f"Running analysis for user: {user_id}")
 
         print("Fetching SpyFu data...")
         fetch_data_from_spyfu(domain_url, output_dir)
 
-        crew = AnalysisCrew(user_id, {
+        crew = AnalysisCrew({
+            'user_id': user_id,
             'institution_name': institution_name,
             'domain_url': domain_url,
         })
@@ -60,7 +77,14 @@ def run_analysis_crew(user_id: str, institution_name: str, domain_url: str, outp
 
 
 def get_available_keywords(userId: str):
-    """Get list of keywords grouped by competitor domains"""
+    """Get list of keywords grouped by competitor domains.
+
+    Args:
+        userId (str): Unique identifier for the user.
+
+    Returns:
+        dict: A dictionary containing the status and keywords grouped by domain.
+    """
     try:
         print(f"Attempting to read keywords for user: {userId}")
 
@@ -94,7 +118,12 @@ def get_available_keywords(userId: str):
 
 
 def save_keyword_details(userId: str, selected_keywords: list[str]):
-    """Get full details for selected keywords"""
+    """Get full details for selected keywords.
+
+    Args:
+        userId (str): Unique identifier for the user.
+        selected_keywords (list[str]): List of selected keywords to get details for.
+    """
     try:
         with open(f'outputs/{userId}/data/competitor_rankings.json', 'r', encoding='utf-8') as f:
             rankings_data = json.load(f)
@@ -114,11 +143,17 @@ def save_keyword_details(userId: str, selected_keywords: list[str]):
 
 
 def run_seo_crew(userId: str, institution_name: str, domain_url: str):
-    """Run the SEO crew"""
+    """Run the SEO crew.
+
+    Args:
+        userId (str): Unique identifier for the user.
+        school_name (str): Name of the school.
+        domain_url (str): The domain URL to analyze.
+    """
     try:
         print(f"Running SEO crew for user: {userId}")
-        crew = SeoCrew(userId)
-        crew.setup({
+        crew = SeoCrew({
+            'user_id': userId,
             'institution_name': institution_name,
             'domain_url': domain_url
         })

@@ -3,33 +3,41 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 
+/**
+ * ForgotPassword component allows users to reset their password by entering their email.
+ */
 export default function ForgotPassword() {
-    const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState(null);
-    const [error, setError] = useState(null);
-    const navigate = useNavigate();
+    const [email, setEmail] = useState(''); // State to hold the email input
+    const [loading, setLoading] = useState(false); // State to manage loading status
+    const [message, setMessage] = useState(null); // State to hold success message
+    const [error, setError] = useState(null); // State to hold error message
+    const navigate = useNavigate(); // Hook to programmatically navigate
 
+    /**
+     * Handles the form submission for password reset.
+     * @param {Event} e - The event object.
+     */
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError(null);
-        setMessage(null);
-        setLoading(true);
+        e.preventDefault(); // Prevent default form submission
+        setError(null); // Reset error state
+        setMessage(null); // Reset message state
+        setLoading(true); // Set loading state to true
 
         try {
+            // Attempt to reset password for the provided email
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${window.location.origin}/reset-password`,
             });
 
-            if (error) throw error;
+            if (error) throw error; // Throw error if there is an issue
 
-            setMessage('Check your email for the password reset link');
-            setTimeout(() => navigate('/login'), 5000);
+            setMessage('Check your email for the password reset link'); // Set success message
+            setTimeout(() => navigate('/login'), 5000); // Redirect to login after 5 seconds
         } catch (error) {
-            console.error('Error:', error);
-            setError(error.message);
+            console.error('Error:', error); // Log error for debugging
+            setError(error.message); // Set error message to display
         } finally {
-            setLoading(false);
+            setLoading(false); // Reset loading state
         }
     };
 
@@ -54,13 +62,13 @@ export default function ForgotPassword() {
                 >
                     {error && (
                         <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
-                            {error}
+                            {error} {/* Display error message */}
                         </div>
                     )}
 
                     {message && (
                         <div className="bg-green-50 text-green-600 p-3 rounded-lg text-sm mb-4">
-                            {message}
+                            {message} {/* Display success message */}
                         </div>
                     )}
 
@@ -73,7 +81,7 @@ export default function ForgotPassword() {
                                 id="email"
                                 type="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => setEmail(e.target.value)} // Update email state on change
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md
                                          shadow-sm focus:outline-none focus:ring-indigo-500
                                          focus:border-indigo-500"
@@ -84,7 +92,7 @@ export default function ForgotPassword() {
                         <div className="flex flex-col space-y-3">
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading} // Disable button while loading
                                 className="w-full py-3 px-4 bg-indigo-600 text-white rounded-lg
                                          hover:bg-indigo-700 transition-colors flex items-center justify-center
                                          disabled:opacity-50 disabled:cursor-not-allowed"
@@ -104,7 +112,7 @@ export default function ForgotPassword() {
 
                             <button
                                 type="button"
-                                onClick={() => navigate('/login')}
+                                onClick={() => navigate('/login')} // Navigate back to login
                                 className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                             >
                                 Back to Login

@@ -4,40 +4,58 @@ import { generateBlog } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+/**
+ * BlogGeneration component fetches and displays a generated blog post
+ * based on the provided outline and user ID from the URL search parameters.
+ */
 export default function BlogGeneration() {
     const [searchParams] = useSearchParams();
-    const [blogContent, setBlogContent] = useState('');
-    const [docxFile, setDocxFile] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [blogContent, setBlogContent] = useState(''); // State to hold the blog content
+    const [docxFile, setDocxFile] = useState(null); // State to hold the generated DOCX file name
+    const [loading, setLoading] = useState(true); // State to manage loading status
+    const [error, setError] = useState(null); // State to manage error messages
 
     useEffect(() => {
+        // Function to generate blog content
         const generateBlogContent = async () => {
             try {
-                const outline = searchParams.get('outline');
-                const userId = searchParams.get('userId');
+                const outline = searchParams.get('outline'); // Get outline from search params
+                const userId = searchParams.get('userId'); // Get user ID from search params
 
+                // Validate required parameters
                 if (!outline || !userId) {
                     throw new Error('Missing required parameters');
                 }
 
+                // Encode the outline properly
+                const encodedOutline = encodeURIComponent(outline);
+
+                // Call the API to generate the blog
                 const result = await generateBlog({
-                    outline: decodeURIComponent(outline),
-                    userId: userId
+                    outline: encodedOutline,
+                    userId: userId // Use the userId from searchParams instead of localStorage
                 });
 
-                setBlogContent(result.blogContent);
-                setDocxFile(result.docxFile);
+                // Update state with the blog content and DOCX file name
+                if (result.status === 'success') {
+                    setBlogContent(result.markdown); // Update to use the correct property for blog content
+                    setDocxFile(result.docxFile);
+                } else {
+                    throw new Error(result.message || 'Failed to generate blog');
+                }
             } catch (err) {
+                // Set error message if an error occurs
                 setError(err.message);
             } finally {
+                // Set loading to false regardless of success or failure
                 setLoading(false);
             }
         };
 
-        generateBlogContent();
+        generateBlogContent(); // Invoke the function to generate blog content
     }, [searchParams]);
 
+    // Function to handle downloading the generated DOCX file
     const handleDownload = () => {
         if (docxFile) {
             const userId = searchParams.get('userId');
@@ -45,6 +63,7 @@ export default function BlogGeneration() {
         }
     };
 
+    // Render loading state
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -56,6 +75,7 @@ export default function BlogGeneration() {
         );
     }
 
+    // Render error state
     if (error) {
         return (
             <div className="min-h-screen bg-gray-50 p-8">
@@ -69,6 +89,7 @@ export default function BlogGeneration() {
         );
     }
 
+    // Render the blog content and download button
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">

@@ -1,39 +1,58 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { runAnalysis } from '../../services/api'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { runAnalysis } from '../../services/api';
 
+/**
+ * InstituteForm component allows users to input their institution details
+ * and initiate an analysis process.
+ */
 export default function InstituteForm() {
-    const [institutionName, setInstitutionName] = useState('')
-    const [domainUrl, setDomainUrl] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null)
-    const navigate = useNavigate()
+    const [institutionName, setInstitutionName] = useState(''); // State for institution name
+    const [domainUrl, setDomainUrl] = useState(''); // State for domain URL
+    const [loading, setLoading] = useState(false); // State to manage loading status
+    const [error, setError] = useState(null); // State to manage error messages
+    const navigate = useNavigate(); // Hook for navigation
 
+    /**
+     * Handles form submission to initiate analysis.
+     * @param {Event} e - The event object from the form submission.
+     */
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        setError(null)
-        setLoading(true)
+        e.preventDefault(); // Prevent default form submission behavior
+        setError(null); // Reset error state
+        setLoading(true); // Set loading state to true
 
         try {
+            // Call the API to run analysis with provided institution details
             const result = await runAnalysis({
                 institution_name: institutionName,
-                domain_url: domainUrl.replace(/^https?:\/\//, '')
-            })
+                domain_url: domainUrl.replace(/^https?:\/\//, '') // Remove protocol from URL
+            });
 
-            navigate('/download', {
-                state: {
-                    institution: institutionName,
-                    domain: domainUrl,
-                    analysisResult: result
-                }
-            })
+            // Check if the analysis was successful
+            if (result.status === 'success') {
+                // Navigate to the download page with analysis results
+                navigate('/download', {
+                    state: {
+                        institution: institutionName,
+                        domain: domainUrl,
+                        analysisResult: result
+                    }
+                });
+            } else {
+                // Throw an error if the analysis failed
+                throw new Error(result.message || 'Analysis failed');
+            }
         } catch (err) {
-            console.error('Form submission error:', err)
-            setError(err.message || 'Failed to start analysis')
-            setLoading(false)
+            // Log the error and set the error state for user feedback
+            console.error('Form submission error:', err);
+            setError(err.message || 'Failed to start analysis');
+        } finally {
+            // Reset loading state regardless of success or failure
+            setLoading(false);
         }
-    }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -59,7 +78,7 @@ export default function InstituteForm() {
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.3 }}
                             >
-                                Enter your institution details to begin
+                                Enter your Institute details to begin
                             </motion.p>
                         </div>
 
@@ -69,7 +88,7 @@ export default function InstituteForm() {
                                 animate={{ opacity: 1 }}
                                 className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg"
                             >
-                                {error}
+                                {error} {/* Display error message if exists */}
                             </motion.div>
                         )}
 
@@ -94,7 +113,7 @@ export default function InstituteForm() {
                                         type="text"
                                         value={institutionName}
                                         onChange={(e) => setInstitutionName(e.target.value)}
-                                        disabled={loading}
+                                        disabled={loading} // Disable input when loading
                                         className={`w-full pl-10 px-4 py-3 rounded-lg border-2 border-gray-200
                                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                                  transition-colors bg-gray-50 hover:bg-white
@@ -125,12 +144,12 @@ export default function InstituteForm() {
                                         type="text"
                                         value={domainUrl}
                                         onChange={(e) => setDomainUrl(e.target.value)}
-                                        disabled={loading}
+                                        disabled={loading} // Disable input when loading
                                         className={`w-full pl-10 px-4 py-3 rounded-lg border-2 border-gray-200
                                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                                  transition-colors bg-gray-50 hover:bg-white
                                                  ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        placeholder="jaipuria.ec.in"
+                                        placeholder="jaipuria.ac.in"
                                         required
                                     />
                                 </div>
@@ -144,7 +163,7 @@ export default function InstituteForm() {
                             >
                                 <button
                                     type="submit"
-                                    disabled={loading}
+                                    disabled={loading} // Disable button when loading
                                     className={`w-full bg-gradient-to-r from-indigo-600 to-purple-600
                                              hover:from-indigo-700 hover:to-purple-700
                                              text-white py-3 px-4 rounded-lg
@@ -173,5 +192,5 @@ export default function InstituteForm() {
                 </motion.div>
             </div>
         </div>
-    )
+    );
 }
