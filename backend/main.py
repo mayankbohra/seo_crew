@@ -20,7 +20,7 @@ def fetch_data_from_spyfu(domain_url: str, output_dir: Path):
         spy_tool = SpyfuTool()
 
         print("\nFetching user rankings...")
-        user_rankings = spy_tool._get_just_made_it_keywords(domain_url)
+        user_rankings = spy_tool._get_newly_ranked_keywords(domain_url)
         user_rankings_json = json.loads(user_rankings)
 
         with open(output_dir / 'data' / 'user_rankings.json', 'w', encoding='utf-8') as f:
@@ -38,7 +38,7 @@ def fetch_data_from_spyfu(domain_url: str, output_dir: Path):
             domain = competitor['domain']
             print(f"\nFetching rankings for: {domain}")
 
-            rankings = spy_tool._get_just_made_it_keywords(domain)
+            rankings = spy_tool._get_newly_ranked_keywords(domain)
             rankings_json = json.loads(rankings)
             rankings_data[domain] = rankings_json
 

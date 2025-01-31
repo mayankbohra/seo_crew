@@ -39,7 +39,7 @@ class SpyfuTool(BaseTool):
         if analysis_type.lower() == 'competitors':
             result = self._get_top_competitors(domain)
         elif analysis_type.lower() == 'rankings':
-            result = self._get_just_made_it_keywords(domain)
+            result = self._get_newly_ranked_keywords(domain)
         else:
             return json.dumps({"error": "Invalid analysis_type. Use 'competitors' or 'rankings'"})
 
@@ -115,7 +115,7 @@ class SpyfuTool(BaseTool):
                 print(f"Exception: {error_msg}")
                 return json.dumps({"error": error_msg})
 
-    def _get_just_made_it_keywords(self, domain: str) -> str:
+    def _get_newly_ranked_keywords(self, domain: str) -> str:
         """Get newly ranking keywords data with filtered fields.
 
         Args:
