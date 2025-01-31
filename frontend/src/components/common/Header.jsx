@@ -35,7 +35,7 @@ export default function Header() {
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center">
                             <span className="ml-2 text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
-                                Jaipuria Institute of Management
+                                Jaipuria Schools
                             </span>
                         </Link>
                     </div>
